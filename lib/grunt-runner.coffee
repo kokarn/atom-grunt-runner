@@ -1,24 +1,30 @@
-Proxy = require './grunt-proxy'
-fs = require('fs')
+fs = require 'fs'
+window.grunt = require 'grunt'
 
 module.exports =
-    gruntRunnerView: null
-
+    path: ""
     activate:(state) ->
-        path = atom.project.getPath()
-        fs.exists path + '/gruntfile.js', (doesExist) ->
+        self = @
+        self.path = atom.project.getPath()
+        fs.exists self.path + '/gruntfile.js', (doesExist) ->
             if doesExist
-                window.proxy = new Proxy()
-                require(path + '/gruntfile.js')(proxy)
-                atom.menu.add [
-                    label: 'Packages'
-                    submenu: [
-                        label: 'Grunt'
-                        submenu: proxy.tasks.map (value) ->
-                            atom.workspaceView.command 'grunt-runner:'+value, ->
-                                console.log("HI")
-                            {label:value, command:'grunt-runner:'+value}
-                    ]
-                ]
+                require(self.path + '/gruntfile.js')(grunt)
+                self.buildMenu Object.keys grunt.task._tasks if grunt.task._tasks
 
-                atom.menu.update()
+    buildMenu:(tasks) ->
+        self = @
+        atom.menu.add [
+            label: 'Packages'
+            submenu: [
+                label: 'Grunt'
+                submenu: tasks.map (value) ->
+                    atom.workspaceView.command 'grunt-runner:'+value, self.handleCommand.bind self
+                    {label:value, command:'grunt-runner:'+value}
+            ]
+        ]
+        atom.menu.update()
+
+    handleCommand:(evt)->
+        task = evt.type.substring 'grunt-runner:'.length
+        grunt.tasks task, {gruntfile: @path + '/gruntfile.js'}, ()->
+            console.log arguments
