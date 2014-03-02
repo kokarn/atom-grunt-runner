@@ -1,0 +1,2 @@
+'.workspace':
+  'ctrl-alt-r': 'grunt-runner:default'
