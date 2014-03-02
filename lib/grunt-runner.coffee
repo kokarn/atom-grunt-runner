@@ -1,13 +1,24 @@
-GruntRunnerView = require './grunt-runner-view'
+Proxy = require './grunt-proxy'
+fs = require('fs')
 
 module.exports =
-  gruntRunnerView: null
+    gruntRunnerView: null
 
-  activate: (state) ->
-    @gruntRunnerView = new GruntRunnerView(state.gruntRunnerViewState)
+    activate:(state) ->
+        path = atom.project.getPath()
+        fs.exists path + '/gruntfile.js', (doesExist) ->
+            if doesExist
+                window.proxy = new Proxy()
+                require(path + '/gruntfile.js')(proxy)
+                atom.menu.add [
+                    label: 'Packages'
+                    submenu: [
+                        label: 'Grunt'
+                        submenu: proxy.tasks.map (value) ->
+                            atom.workspaceView.command 'grunt-runner:'+value, ->
+                                console.log("HI")
+                            {label:value, command:'grunt-runner:'+value}
+                    ]
+                ]
 
-  deactivate: ->
-    @gruntRunnerView.destroy()
-
-  serialize: ->
-    gruntRunnerViewState: @gruntRunnerView.serialize()
+                atom.menu.update()
