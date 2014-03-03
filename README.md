@@ -1,16 +1,21 @@
-grunt-runner (WIP)
+[grunt-runner](https://atom.io/packages/grunt-runner) (WIP)
 ================
 
 Build your project using Grunt from Atom.
 
-Grunt Runner looks for a Gruntfile in your projects root, if it successfully
-finds one it will fill the `Packages->Grunt->` menu with all possible tasks.
-If an error occurs while grunt runs, the output will appear in the Dev tools
-console.
+![in action!](http://i.imgur.com/hGmS1C1.png)
+
+## How to use
+
+ * Open a project that has a `Gruntfile.js` in the root.
+ * Choose a task to run from `Packages->Grunt->Task: your-task`, or press
+ `ctrl-alt-g` to run the `default` task.
+ * If an error occurs Grunt Runner will beep, and open up the Developer tools
+ where you can see the output and error code.
+ * If your task doesn't end automatically (e.g. watches files for changes) you
+ can force it stop from the menu or by pressing `ctrl-alt-shift-g`.
 
 Some [issues still exist](#known-issues).
-
-![in action!](http://i.imgur.com/QuDJmU0.png)
 
 ## Installation
 

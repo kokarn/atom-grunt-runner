@@ -36,7 +36,7 @@ module.exports =
                     {label:'Stop Current Task', command:'grunt-runner:stop'}
                     ].concat tasks.map (value) ->
                     atom.workspaceView.command 'grunt-runner:'+value, self.handleCommand.bind self
-                    {label:value, command:'grunt-runner:'+value}
+                    {label:'Task: ' + value, command:'grunt-runner:'+value}
             ]
         ]
         atom.menu.update()
