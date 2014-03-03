@@ -1,2 +1,3 @@
 '.workspace':
-  'ctrl-alt-r': 'grunt-runner:default'
+  'ctrl-alt-g': 'grunt-runner:default'
+  'ctrl-alt-shift-g': 'grunt-runner:stop'
