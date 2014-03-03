@@ -1,16 +1,25 @@
 fs = require 'fs'
 window.grunt = require 'grunt'
+{BufferedProcess} = require 'atom'
 
 module.exports =
-    path: ""
+
+    # Activates the packages
+    # tests for a gruntfile in the project directory
+    # if one exists reads it and starts building the menu
     activate:(state) ->
         self = @
         self.path = atom.project.getPath()
         fs.exists self.path + '/gruntfile.js', (doesExist) ->
             if doesExist
-                require(self.path + '/gruntfile.js')(grunt)
+                try
+                    require(self.path + '/gruntfile.js')(grunt)
+
                 self.buildMenu Object.keys grunt.task._tasks if grunt.task._tasks
 
+    # fills the grunt runner menu with the given tasks
+    # attaches event listeners to each task
+    # TODO add refresh once Atom supports removing menu items
     buildMenu:(tasks) ->
         self = @
         atom.menu.add [
@@ -24,7 +33,17 @@ module.exports =
         ]
         atom.menu.update()
 
+    # handles a menu item being pressed
+    # runs a grunt process in the background
     handleCommand:(evt)->
-        task = evt.type.substring 'grunt-runner:'.length
-        grunt.tasks task, {gruntfile: @path + '/gruntfile.js'}, ()->
-            console.log arguments
+        taskToRun = evt.type.substring 'grunt-runner:'.length
+
+        process = new BufferedProcess
+            command: 'grunt'
+            options:
+                cwd : @path
+            args: [taskToRun]
+            stdout: (output) ->
+                console.log output
+            exit: (code) ->
+                console.log code
