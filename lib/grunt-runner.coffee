@@ -10,10 +10,10 @@ module.exports =
     activate:(state) ->
         self = @
         self.path = atom.project.getPath()
-        fs.exists self.path + '/gruntfile.js', (doesExist) ->
+        fs.exists self.path + '/Gruntfile.js', (doesExist) ->
             if doesExist
                 try
-                    require(self.path + '/gruntfile.js')(grunt)
+                    require(self.path + '/Gruntfile.js')(grunt)
 
                 # wish there was a less hackier way than _tasks
                 self.buildMenu Object.keys grunt.task._tasks if grunt.task._tasks
