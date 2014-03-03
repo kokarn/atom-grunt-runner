@@ -1,5 +1,5 @@
 fs = require 'fs'
-window.grunt = require 'grunt'
+grunt = require 'grunt'
 {BufferedProcess} = require 'atom'
 
 module.exports =
@@ -15,6 +15,7 @@ module.exports =
                 try
                     require(self.path + '/gruntfile.js')(grunt)
 
+                # wish there was a less hackier way than _tasks
                 self.buildMenu Object.keys grunt.task._tasks if grunt.task._tasks
 
     # fills the grunt runner menu with the given tasks
@@ -38,12 +39,18 @@ module.exports =
     handleCommand:(evt)->
         taskToRun = evt.type.substring 'grunt-runner:'.length
 
+        output = ""
+
         process = new BufferedProcess
             command: 'grunt'
             options:
                 cwd : @path
             args: [taskToRun]
-            stdout: (output) ->
-                console.log output
+            stdout: (out) ->
+                # borrowed from https://github.com/Filirom1/stripcolorcodes (MIT license)
+                output += out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
             exit: (code) ->
-                console.log code
+                console.log output
+                if code != 0
+                    atom.beep()
+                    atom.openDevTools()
