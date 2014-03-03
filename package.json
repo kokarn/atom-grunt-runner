@@ -2,7 +2,7 @@
   "name": "grunt-runner",
   "description": "Run your grunt tasks from Atom.",
   "main": "./lib/grunt-runner.coffee",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": "https://github.com/nickclaw/atom-grunt-runner",
   "license": "MIT",
   "engines": {
