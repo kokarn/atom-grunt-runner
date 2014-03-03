@@ -1,6 +1,6 @@
 {
   "name": "grunt-runner",
-  "description": "Run your projects grunt tasks from Atom.",
+  "description": "Run your grunt tasks from Atom.",
   "main": "./lib/grunt-runner.coffee",
   "version": "0.2.0",
   "repository": "https://github.com/nickclaw/atom-grunt-runner",

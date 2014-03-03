@@ -8,7 +8,7 @@ finds one it will fill the `Packages->Grunt->` menu with all possible tasks.
 If an error occurs while grunt runs, the output will appear in the Dev tools
 console.
 
-Some [issues still exist](#issues).
+Some [issues still exist](#known-issues).
 
 ![in action!](http://i.imgur.com/QuDJmU0.png)
 
@@ -31,7 +31,6 @@ Then open Atom in developer mode (Atom command tools must be installed)
     cd path/to/package
     atom --dev
 
-<a href="issues"></a>
 ## Known issues
 
  * Grunt Runner currently only supports one open project at a time. If
