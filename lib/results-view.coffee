@@ -7,7 +7,7 @@ module.exports = class ResultsView extends View
     #    panel
     #    errorList
 
-    @content: (params) ->
+    @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom', =>
             @div class: 'panel-heading-affix padded', =>
                 @span 'grunt-runner : '

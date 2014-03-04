@@ -3,15 +3,15 @@
 
 Build your project using Grunt from Atom.
 
-![in action!](http://i.imgur.com/hGmS1C1.png)
+![in action!](http://i.imgur.com/a8N7y5S.png)
 
 ## How to use
 
  * Open a project that has a `Gruntfile.js` in the root.
  * Choose a task to run from `Packages->Grunt->Task: your-task`, or press
  `ctrl-alt-g` to run the `default` task.
- * If an error occurs Grunt Runner will beep, and open up the Developer tools
- where you can see the output and error code.
+ * All output from the grunt process can be found in the bottom tool panel. You
+ can toggle it with `ctrl-alt-t`.
  * If your task doesn't end automatically (e.g. watches files for changes) you
  can force it stop from the menu or by pressing `ctrl-alt-shift-g`.
 

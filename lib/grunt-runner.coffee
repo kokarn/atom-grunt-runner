@@ -7,7 +7,7 @@ module.exports =
 
     path:""
     process:null
-    view: null
+    view:null
 
     # Activates the packages
     # tests for a gruntfile in the project directory
@@ -36,7 +36,7 @@ module.exports =
             atom.workspaceView.command command, handler
             {label:"Task: #{value}", command:command}
         .concat [
-            {label:''}
+            {label:''} # temporary seperator
             {label:'Stop Current Task', command:'grunt-runner:stop'}
             {label:'Toggle Grunt Output', command: 'grunt-runner:toggle'}
         ]
@@ -51,6 +51,7 @@ module.exports =
 
         atom.menu.update()
 
+    # attaches/detaches the view
     toggleView: ->
         return atom.workspaceView.prependToBottom @view unless @view.isOnDom()
         return @view.detach() if @view.isOnDom()
@@ -58,9 +59,9 @@ module.exports =
 
     # kills process if one is running
     stopProcess: ->
+        @view.addLine "Grunt task was ended." if @process and not @process.killed
         @process?.kill()
         @process = null
-        @view.addLine "Grunt task was ended."
 
     # handles a menu item being pressed
     # runs a grunt process in the background
@@ -70,12 +71,13 @@ module.exports =
         @stopProcess()
 
         taskToRun = evt.type.substring "grunt-runner:".length
+
+        # prepare view
         @view.emptyView().changeTask taskToRun
         @toggleView() unless @view.isOnDom()
         @view.addLine "Running : grunt #{taskToRun}"
 
         view = @view
-
         @process = new BufferedProcess
             command: 'grunt'
             options:

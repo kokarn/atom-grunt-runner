@@ -1,4 +1,4 @@
 '.workspace':
   'ctrl-alt-g': 'grunt-runner:default'
-  'ctrl-alt-shift-g': 'grunt-runner:stop'
+  'ctrl-alt-G': 'grunt-runner:stop'
   'ctrl-alt-t': 'grunt-runner:toggle'
