@@ -1,10 +1,25 @@
 {
   "name": "grunt-runner",
   "description": "Run your grunt tasks from Atom.",
-  "main": "./lib/grunt-runner.coffee",
+  "keywords":[
+      "grunt",
+      "task",
+      "runner",
+      "build",
+      "watch",
+      "atom",
+      "package",
+      "run"
+  ],
   "version": "0.3.0",
   "repository": "https://github.com/nickclaw/atom-grunt-runner",
   "license": "MIT",
+  "author":{
+      "name":"Nicholas Clawson",
+      "url":"http://nickclaw.com"
+  },
+
+  "main": "./lib/grunt-runner.coffee",
   "engines": {
     "atom": ">0.50.0"
   },

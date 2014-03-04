@@ -1,11 +1,13 @@
 fs = require 'fs'
 grunt = require 'grunt'
 {BufferedProcess} = require 'atom'
+window.View = require './results-view.coffee'
 
 module.exports =
 
     path:""
     process:null
+    view: null
 
     # Activates the packages
     # tests for a gruntfile in the project directory
@@ -45,6 +47,7 @@ module.exports =
     stopProcess: ->
         @process?.kill()
         @process = null
+        @view?.addLine "Grunt task was ended."
 
     # handles a menu item being pressed
     # runs a grunt process in the background
@@ -56,7 +59,16 @@ module.exports =
         taskToRun = evt.type.substring 'grunt-runner:'.length
         output = ""
 
-        console.log "Running : grunt " + taskToRun
+        # clear view
+
+        # make new view
+        @view = view = @view?.changeTask(taskToRun) or new View
+            task : taskToRun
+
+        @view.emptyView()
+        atom.workspaceView.prependToBottom @view
+
+        view.addLine "Running : grunt #{taskToRun}"
 
         @process = new BufferedProcess
             command: 'grunt'
@@ -65,11 +77,8 @@ module.exports =
             args: [taskToRun]
             stdout: (out) ->
                 # borrowed from https://github.com/Filirom1/stripcolorcodes (MIT license)
-                output += out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
-                console.log out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
+                view.addLine out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
             exit: (code) ->
-                console.log output
-                console.log "Grunt exited: code " + code + "\n"
+                view.addLine "Grunt exited: code #{code}\n"
                 if code != 0
                     atom.beep()
-                    atom.openDevTools()
