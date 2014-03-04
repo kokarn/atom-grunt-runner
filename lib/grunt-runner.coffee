@@ -14,12 +14,14 @@ module.exports =
     # if one exists reads it and starts building the menu
     activate:(state) ->
         atom.workspaceView.command 'grunt-runner:stop', @stopProcess.bind @
+        atom.workspaceView.command 'grunt-runner:toggle', @toggleView.bind @
+        @path = atom.project.getPath()
+        @view = new View()
 
         self = @
-        self.path = atom.project.getPath()
         fs.exists self.path + '/Gruntfile.js', (doesExist) ->
             if doesExist
-                try
+                try # in case of bad syntax
                     require(self.path + '/Gruntfile.js')(grunt)
 
                 # wish there was a less hackier way than _tasks
@@ -27,27 +29,38 @@ module.exports =
 
     # fills the grunt runner menu with the given tasks
     # attaches event listeners to each task
-    # TODO add refresh once Atom supports removing menu items
     buildMenu:(tasks) ->
-        self = @
+        handler = @handleCommand.bind @
+        submenu = tasks.map (value) ->
+            command = "grunt-runner:#{value}"
+            atom.workspaceView.command command, handler
+            {label:"Task: #{value}", command:command}
+        .concat [
+            {label:''}
+            {label:'Stop Current Task', command:'grunt-runner:stop'}
+            {label:'Toggle Grunt Output', command: 'grunt-runner:toggle'}
+        ]
+
         atom.menu.add [
             label: 'Packages'
             submenu: [
                 label: 'Grunt'
-                submenu: [
-                    {label:'Stop Current Task', command:'grunt-runner:stop'}
-                    ].concat tasks.map (value) ->
-                    atom.workspaceView.command 'grunt-runner:'+value, self.handleCommand.bind self
-                    {label:'Task: ' + value, command:'grunt-runner:'+value}
+                submenu: submenu
             ]
         ]
+
         atom.menu.update()
+
+    toggleView: ->
+        return atom.workspaceView.prependToBottom @view unless @view.isOnDom()
+        return @view.detach() if @view.isOnDom()
+
 
     # kills process if one is running
     stopProcess: ->
         @process?.kill()
         @process = null
-        @view?.addLine "Grunt task was ended."
+        @view.addLine "Grunt task was ended."
 
     # handles a menu item being pressed
     # runs a grunt process in the background
@@ -56,19 +69,12 @@ module.exports =
         #stop process if one is running
         @stopProcess()
 
-        taskToRun = evt.type.substring 'grunt-runner:'.length
-        output = ""
+        taskToRun = evt.type.substring "grunt-runner:".length
+        @view.emptyView().changeTask taskToRun
+        @toggleView() unless @view.isOnDom()
+        @view.addLine "Running : grunt #{taskToRun}"
 
-        # clear view
-
-        # make new view
-        @view = view = @view?.changeTask(taskToRun) or new View
-            task : taskToRun
-
-        @view.emptyView()
-        atom.workspaceView.prependToBottom @view
-
-        view.addLine "Running : grunt #{taskToRun}"
+        view = @view
 
         @process = new BufferedProcess
             command: 'grunt'

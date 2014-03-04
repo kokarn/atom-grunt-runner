@@ -9,17 +9,11 @@ module.exports = class ResultsView extends View
 
     @content: (params) ->
         @div class: 'grunt-runner-results tool-panel panel-bottom', =>
-            @div click:"destroy", class: 'panel-heading-affix padded', =>
+            @div class: 'panel-heading-affix padded', =>
                 @span 'grunt-runner : '
-                @span outlet:'title', params.task
+                @span outlet:'title', "no task"
             @div outlet:'panel', class: 'panel-body padded', =>
                 @ul outlet:'errorList', class: 'list-group'
-
-    initialize:(params) ->
-        console.log 'initialized view'
-
-    destroy: ->
-        @detach()
 
     changeTask: (task) ->
         @title.text task
@@ -27,6 +21,7 @@ module.exports = class ResultsView extends View
 
     emptyView: ->
         @errorList.empty()
+        return @
 
     addLine:(text, type = "plain") ->
         [panel, errorList] = [@panel, @errorList]
@@ -35,3 +30,5 @@ module.exports = class ResultsView extends View
             stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
             errorList.append "<li class='grunt-format-#{type}'>#{value}</li>"
             panel.scrollTop errorList.height() if stuckToBottom
+
+        return @
