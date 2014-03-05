@@ -9,7 +9,8 @@ module.exports =
         @view = view = new View()
 
         atom.workspaceView.command 'grunt-runner:stop', @view.stopProcess.bind @view
-        atom.workspaceView.command 'grunt-runner:toggle', @view.togglePanel.bind @view
+        atom.workspaceView.command 'grunt-runner:toggle-log', @view.toggleLog.bind @view
+        atom.workspaceView.command 'grunt-runner:toggle-panel', @view.togglePanel.bind @view
         atom.workspaceView.command 'grunt-runner:default', ->
             view.input.attr 'value', 'default'
             view.startProcess()

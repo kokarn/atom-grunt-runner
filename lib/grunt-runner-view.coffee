@@ -12,9 +12,10 @@ module.exports = class ResultsView extends View
         @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
             @div outlet: 'status', class: 'panel-heading', =>
                 @input keydown: 'checkSelect', outlet:'input', class: 'editor mini editor-colors', value: 'default'
-                @button click:'startProcess', class:'btn', 'Start Grunt'
-                @button click:'stopProcess', class:'btn', 'Stop Grunt'
-                @button click:'togglePanel', class:'btn', 'Toggle Log'
+                @button outlet:'startbtn', click:'startProcess', class:'btn key-bindings', 'Start Grunt'
+                @button outlet:'stopbtn', click:'stopProcess', class:'btn key-bindings', 'Stop Grunt'
+                @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
+                @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
             @div outlet:'panel', class: 'panel-body padded closed', =>
                 @ul outlet:'errors', class: 'list-group'
 
@@ -25,14 +26,24 @@ module.exports = class ResultsView extends View
         @path = atom.project.getPath();
         view = @
 
+        @stopbtn.setTooltip "",
+            command: 'grunt-runner:stop'
+
+        @logbtn.setTooltip "",
+            command: 'grunt-runner:toggle-log'
+
+        @panelbtn.setTooltip "",
+            command: 'grunt-runner:toggle-panel'
+
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
             {error, tasks} = results
 
             if error
                 console.warn "grunt-runner: #{error}"
             else
-                atom.workspaceView.prependToBottom view
+                view.togglePanel()
                 tasks.forEach (task) ->
+                    console.log task
                     #view.tasks.append "<li>#{task}</li>"
 
     # called to start the process
@@ -40,7 +51,7 @@ module.exports = class ResultsView extends View
     startProcess: ->
         @stopProcess()
         @emptyPanel()
-        @togglePanel() if @panel.hasClass 'closed'
+        @toggleLog() if @panel.hasClass 'closed'
         @status.attr 'data-status', 'loading'
 
         task = @input[0].value
@@ -55,8 +66,12 @@ module.exports = class ResultsView extends View
         @process = null
         @status.attr 'data-status', null
 
-    # hides and shows the log panel
     togglePanel: ->
+        return atom.workspaceView.prependToBottom @ unless @.isOnDom()
+        return @.detach() if @.isOnDom()
+
+    # hides and shows the log panel
+    toggleLog: ->
         @panel.toggleClass 'closed'
 
     checkSelect:(evt) ->

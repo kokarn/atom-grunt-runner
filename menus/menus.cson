@@ -7,7 +7,8 @@
         'submenu': [
           {'label': 'Stop Process', 'command': 'grunt-runner:stop'}
           {'label': 'Run Default Task', 'command': 'grunt-runner:default'}
-          {'label': 'Toggle Log', 'command': 'grunt-runner:toggle'}
+          {'label': 'Toggle Log', 'command': 'grunt-runner:toggle-log'}
+          {'label': 'Toggle Panel', 'command': 'grunt-runner:toggle-panel'}
         ]
       }
     ]
