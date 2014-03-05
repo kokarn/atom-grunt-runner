@@ -1,6 +1,6 @@
 # Nicholas Clawson - 05/02/2014 #
 
-window.View = require './results-view.coffee'
+window.View = require './grunt-runner-view.coffee'
 
 module.exports =
 

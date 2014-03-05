@@ -25,7 +25,7 @@ module.exports = class ResultsView extends View
         @path = atom.project.getPath();
         view = @
 
-        Task.once require.resolve('./build-menu'), atom.project.getPath()+'/gruntfile', (results)->
+        Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
             {error, classes} = results
 
             if error
