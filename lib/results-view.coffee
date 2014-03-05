@@ -1,4 +1,5 @@
 {View, BufferedProcess} = require 'atom'
+grunt = require 'grunt'
 
 module.exports = class ResultsView extends View
 
@@ -17,12 +18,22 @@ module.exports = class ResultsView extends View
 
     initialize:(state = {}) ->
         @path = atom.project.getPath();
-        atom.workspaceView.prependToBottom @
+
+        try
+            require(atom.project.getPath()+'/gruntfile')(grunt)
+            atom.workspaceView.prependToBottom @
+        catch e
+            console.warn 'grunt-runner: ' + e
+
+        Object.keys(grunt.task._tasks).forEach (task) ->
+            console.log task
+
+
 
     startProcess: ->
         @stopProcess()
         @emptyPanel()
-        @togglePanel unless @panel.hasClass 'closed'
+        @togglePanel if @panel.hasClass 'closed'
 
         task = @input.attr 'value'
         @addLine "Running : grunt #{task}", 'subtle'
