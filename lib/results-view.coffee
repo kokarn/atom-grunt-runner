@@ -11,7 +11,7 @@ module.exports = class ResultsView extends View
                 @input outlet:'input', class: 'editor mini editor-colors', value: 'default'
                 @button click:'startProcess', class:'btn', 'Start Grunt'
                 @button click:'stopProcess', class:'btn', 'Stop Grunt'
-                @button click:'togglePanel', class:'btn', 'Show Log'
+                @button click:'togglePanel', class:'btn', 'Toggle Log'
             @div outlet:'panel', class: 'panel-body padded closed', =>
                 @ul outlet:'errors', class: 'list-group'
 
@@ -22,6 +22,7 @@ module.exports = class ResultsView extends View
     startProcess: ->
         @stopProcess()
         @emptyPanel()
+        @togglePanel unless @panel.hasClass 'closed'
 
         task = @input.attr 'value'
         @addLine "Running : grunt #{task}", 'subtle'

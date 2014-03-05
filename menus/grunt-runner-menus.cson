@@ -1,0 +1,15 @@
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      {
+        'label': 'Grunt Runner'
+        'submenu': [
+          {'label': 'Stop Process', 'command': 'grunt-runner:stop'}
+          {'label': 'Run Default Task', 'command': 'grunt-runner:default'}
+          {'label': 'Toggle Log', 'command': 'grunt-runner:toggle'}
+        ]
+      }
+    ]
+  }
+]
