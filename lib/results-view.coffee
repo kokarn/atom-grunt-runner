@@ -1,5 +1,4 @@
-{View, BufferedProcess} = require 'atom'
-grunt = require 'grunt'
+{View, BufferedProcess, Task} = require 'atom'
 
 module.exports = class ResultsView extends View
 
@@ -18,24 +17,21 @@ module.exports = class ResultsView extends View
 
     initialize:(state = {}) ->
         @path = atom.project.getPath();
+        view = @
 
-        try
-            require(atom.project.getPath()+'/gruntfile')(grunt)
-            atom.workspaceView.prependToBottom @
-        catch e
-            console.warn 'grunt-runner: ' + e
+        Task.once require.resolve('./build-menu'), atom.project.getPath()+'/gruntfile', (results)->
+            {error, classes} = results
 
-        Object.keys(grunt.task._tasks).forEach (task) ->
-            console.log task
-
-
+            if error
+                console.warn "grunt-runner: #{error}"
+            else
+                atom.workspaceView.prependToBottom view
 
     startProcess: ->
         @stopProcess()
         @emptyPanel()
         @togglePanel() if @panel.hasClass 'closed'
         @status.attr 'data-status', 'loading'
-        console.log @status.data
 
         task = @input[0].value
         @addLine "Running : grunt #{task}", 'subtle'
@@ -53,7 +49,7 @@ module.exports = class ResultsView extends View
 
     addLine:(text, type = "plain") ->
         [panel, errorList] = [@panel, @errors]
-        text = text.trim().replace /\n+/, '<br />'
+        text = text.trim().replace /[\r\n]+/g, '<br />'
         stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
         errorList.append "<li class='text-#{type}'>#{text}</li>"
         panel.scrollTop errorList.height() if stuckToBottom
