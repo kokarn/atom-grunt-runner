@@ -1,34 +1,64 @@
-{View} = require 'atom'
+{View, BufferedProcess} = require 'atom'
 
 module.exports = class ResultsView extends View
 
-    #outlets:
-    #    title
-    #    panel
-    #    errorList
+    path: null,
+    process: null,
 
     @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom', =>
-            @div class: 'panel-heading-affix padded', =>
-                @span 'grunt-runner : '
-                @span outlet:'title', "no task"
-            @div outlet:'panel', class: 'panel-body padded', =>
-                @ul outlet:'errorList', class: 'list-group'
+            @div class: 'panel-heading', =>
+                @input outlet:'input', class: 'editor mini editor-colors', value: 'default'
+                @button click:'startProcess', class:'btn', 'Start Grunt'
+                @button click:'stopProcess', class:'btn', 'Stop Grunt'
+                @button click:'togglePanel', class:'btn', 'Show Log'
+            @div outlet:'panel', class: 'panel-body padded closed', =>
+                @ul outlet:'errors', class: 'list-group'
 
-    changeTask: (task) ->
-        @title.text task
-        return @
+    initialize:(state = {}) ->
+        @path = atom.project.getPath();
+        atom.workspaceView.prependToBottom @
 
-    emptyView: ->
-        @errorList.empty()
-        return @
+    startProcess: ->
+        @stopProcess()
+        @emptyPanel()
+
+        task = @input.attr 'value'
+        @addLine "Running : grunt #{task}", 'subtle'
+
+        @gruntTask task, @path
+
+    stopProcess: ->
+        @addLine 'Grunt task was ended', 'warning' if @process?.killed
+        @process?.kill()
+        @process = null
+
+    togglePanel: ->
+        @panel.toggleClass 'closed'
 
     addLine:(text, type = "plain") ->
-        [panel, errorList] = [@panel, @errorList]
+        [panel, errorList] = [@panel, @errors]
+        stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
+        errorList.append "<li class='text-#{type}'>#{text}</li>"
+        panel.scrollTop errorList.height() if stuckToBottom
 
-        text.split("\n").forEach (value)->
-            stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
-            errorList.append "<li class='grunt-format-#{type}'>#{value}</li>"
-            panel.scrollTop errorList.height() if stuckToBottom
+    emptyPanel: ->
+        @errors.empty()
 
-        return @
+    serialize: ->
+        return {}
+
+    gruntTask:(task, path) ->
+
+        stdout = (out) ->
+            @addLine out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
+        exit = (code) ->
+            atom.beep() unless code == 0
+            @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
+
+        @process = new BufferedProcess
+            command: 'grunt'
+            args: [task]
+            options: {cwd: path}
+            stdout: stdout.bind @
+            exit: exit.bind @

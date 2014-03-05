@@ -1,11 +1,49 @@
-.grunt-runner-results .panel-body {
-    max-height: 100px;
-    overflow-y: scroll;
+.grunt-runner-results {
 
-    .list-group li {
-        margin: 0px;
+    .panel-heading {
+        padding: 5px 10px;
+
+        input, .btn {
+            display: inline-block;
+            border-radius: 0px;
+            position: static;
+            margin-right: 1px;
+
+            font-size: 9pt;
+            height: 16pt;
+            line-height: 9pt;
+            padding: 6px;
+
+            &:first-child {
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+            }
+
+            &:last-child {
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
+        }
+    }
+
+    .panel-body {
+        max-height: 100px;
+        overflow-y: scroll;
+
+        li {
+            padding: 3px 0px;
+            margin: 0px;
+            font-size: 9pt;
+            line-height: 12pt;
+            white-space: normal;
+            border-bottom: solid 1px rgba(0,0,0,.5);
+            font-family: monospace;
+        }
+    }
+
+    .panel-body.closed{
         padding: 0px;
-        line-height: initial;
-        font-family: monospace;
+        max-height: 0px;
+        margin-top: -1px;
     }
 }
