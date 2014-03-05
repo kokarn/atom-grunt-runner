@@ -2,17 +2,23 @@
 
     .panel-heading {
         padding: 5px 10px;
+        font-size: 9pt;
+        line-height: 9pt;
+
+        input {
+            padding-left: 20px !important;
+        }
 
         input, .btn {
             display: inline-block;
             border-radius: 0px;
             position: static;
             margin-right: 1px;
-
-            font-size: 9pt;
-            height: 16pt;
-            line-height: 9pt;
             padding: 6px;
+
+            font-size: inherit;
+            height: 16pt;
+            line-height: inherit;
 
             &:first-child {
                 border-top-left-radius: 5px;
@@ -23,6 +29,36 @@
                 border-top-right-radius: 5px;
                 border-bottom-right-radius: 5px;
             }
+        }
+
+        &:before {
+            font-family: 'Octicons Regular';
+            font-weight: normal;
+            font-style: normal;
+            display: inline-block;
+            position: absolute;
+            line-height: 16pt;
+            -webkit-font-smoothing: antialiased;
+            text-decoration: none;
+            font-size: 10pt;
+            width: 10pt;
+            height: 10pt;
+            left: 17px;
+            content: "\f052"
+        }
+
+        &[data-status=loading]:before {
+            content: "\f09e";
+        }
+
+        &[data-status=ready]:before {
+            color: green;
+            content: "\f03a";
+        }
+
+        &[data-status=error]:before {
+            color: "red";
+            content: "\f02d";
         }
     }
 

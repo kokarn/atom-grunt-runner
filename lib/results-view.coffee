@@ -8,7 +8,7 @@ module.exports = class ResultsView extends View
 
     @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom', =>
-            @div class: 'panel-heading', =>
+            @div outlet: 'status', class: 'panel-heading', =>
                 @input outlet:'input', class: 'editor mini editor-colors', value: 'default'
                 @button click:'startProcess', class:'btn', 'Start Grunt'
                 @button click:'stopProcess', class:'btn', 'Stop Grunt'
@@ -33,23 +33,27 @@ module.exports = class ResultsView extends View
     startProcess: ->
         @stopProcess()
         @emptyPanel()
-        @togglePanel if @panel.hasClass 'closed'
+        @togglePanel() if @panel.hasClass 'closed'
+        @status.attr 'data-status', 'loading'
+        console.log @status.data
 
-        task = @input.attr 'value'
+        task = @input[0].value
         @addLine "Running : grunt #{task}", 'subtle'
 
         @gruntTask task, @path
 
     stopProcess: ->
-        @addLine 'Grunt task was ended', 'warning' if @process?.killed
+        @addLine 'Grunt task was ended', 'warning' unless @process?.killed
         @process?.kill()
         @process = null
+        @status.attr 'data-status', null
 
     togglePanel: ->
         @panel.toggleClass 'closed'
 
     addLine:(text, type = "plain") ->
         [panel, errorList] = [@panel, @errors]
+        text = text.trim().replace /\n+/, '<br />'
         stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
         errorList.append "<li class='text-#{type}'>#{text}</li>"
         panel.scrollTop errorList.height() if stuckToBottom
@@ -67,6 +71,7 @@ module.exports = class ResultsView extends View
         exit = (code) ->
             atom.beep() unless code == 0
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
+            @status.attr 'data-status', if code == 0 then 'ready' else 'error'
 
         @process = new BufferedProcess
             command: 'grunt'
