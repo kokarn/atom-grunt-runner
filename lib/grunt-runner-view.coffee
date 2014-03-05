@@ -9,9 +9,9 @@ module.exports = class ResultsView extends View
 
     # html layout
     @content: ->
-        @div class: 'grunt-runner-results tool-panel panel-bottom', =>
+        @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
             @div outlet: 'status', class: 'panel-heading', =>
-                @input outlet:'input', class: 'editor mini editor-colors', value: 'default'
+                @input keydown: 'checkSelect', outlet:'input', class: 'editor mini editor-colors', value: 'default'
                 @button click:'startProcess', class:'btn', 'Start Grunt'
                 @button click:'stopProcess', class:'btn', 'Stop Grunt'
                 @button click:'togglePanel', class:'btn', 'Toggle Log'
@@ -26,12 +26,14 @@ module.exports = class ResultsView extends View
         view = @
 
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
-            {error, classes} = results
+            {error, tasks} = results
 
             if error
                 console.warn "grunt-runner: #{error}"
             else
                 atom.workspaceView.prependToBottom view
+                tasks.forEach (task) ->
+                    #view.tasks.append "<li>#{task}</li>"
 
     # called to start the process
     # task name is gotten from the input element
@@ -56,6 +58,12 @@ module.exports = class ResultsView extends View
     # hides and shows the log panel
     togglePanel: ->
         @panel.toggleClass 'closed'
+
+    checkSelect:(evt) ->
+        if evt.which == 13
+            @startProcess()
+            @input.blur()
+            return false
 
     # adds an entry to the log
     # converts all newlines to <br>

@@ -9,4 +9,4 @@ module.exports = (path) ->
     catch e
         error = e.code
 
-    return {error: error, classes: Object.keys grunt.task._tasks}
+    return {error: error, tasks: Object.keys grunt.task._tasks}
