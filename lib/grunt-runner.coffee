@@ -1,11 +1,10 @@
-{BufferedProcess} = require 'atom'
+# Nicholas Clawson - 05/02/2014 #
+
 window.View = require './results-view.coffee'
 
 module.exports =
 
-    # Activates the packages
-    # tests for a gruntfile in the project directory
-    # if one exists reads it and starts building the menu
+
     activate:(state = {}) ->
         @view = view = new View()
 
@@ -17,3 +16,6 @@ module.exports =
 
     serialize: ->
         @view.serialize()
+
+    destory: ->
+        @view.stopProcess()
