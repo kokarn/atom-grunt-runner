@@ -1,4 +1,11 @@
-# Nicholas Clawson - 05/02/2014 #
+###
+Nicholas Clawson -2014
+
+The bottom toolbar. In charge handling user input and implementing
+various commands. Creates a SelectListView and launches a task to
+discover the projects grunt commands. Logs errors and output.
+Also launches an Atom BufferedProcess to run grunt when needed.
+###
 
 {View, BufferedProcess, Task} = require 'atom'
 ListView = require './task-list-view'
@@ -14,7 +21,7 @@ module.exports = class ResultsView extends View
         @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
             @div outlet:'status', class: 'grunt-panel-heading', =>
                 @div class: 'btn-group', =>
-                    @button outlet:'startbtn', click:'openList', class:'btn', 'Start Grunt'
+                    @button outlet:'startbtn', click:'toggleTaskList', class:'btn', 'Start Grunt'
                     @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
                     @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
                     @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
@@ -22,20 +29,21 @@ module.exports = class ResultsView extends View
                 @ul outlet:'errors', class: 'list-group'
 
     # called after the view is constructed
-    #gets the projects current path and launches a task
+    # gets the projects current path and launches a task
     # to parse the projects gruntfile if it exists
     initialize:(state = {}) ->
         @path = atom.project.getPath();
-        view = @
-
         @taskList = new ListView @startProcess.bind(@), state.taskList
 
+        view = @
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', ({error, tasks})->
+            # now that we're ready, add some tooltips
             view.startbtn.setTooltip "", command: 'grunt-runner:run'
             view.stopbtn.setTooltip "", command: 'grunt-runner:stop'
             view.logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
             view.panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
 
+            # log error or add panel to workspace
             if error
                 console.warn "grunt-runner: #{error}"
                 view.addLine "Error loading gruntfile: #{error}", "error"
@@ -43,9 +51,6 @@ module.exports = class ResultsView extends View
             else
                 view.togglePanel()
                 view.taskList.addItems tasks
-
-    openList: ->
-        @taskList.attach();
 
     # called to start the process
     # task name is gotten from the input element
@@ -66,23 +71,20 @@ module.exports = class ResultsView extends View
         @process = null
         @status.attr 'data-status', null
 
+    # toggles the visibility of the entire panel
     togglePanel: ->
         return atom.workspaceView.prependToBottom @ unless @.isOnDom()
-        return @.detach() if @.isOnDom()
+        return @detach() if @.isOnDom()
 
-    # hides and shows the log panel
+    # toggles the visibility of the log
     toggleLog: ->
         @panel.toggleClass 'closed'
 
+    # toggles the visibility of the tasklist
     toggleTaskList: ->
         return @taskList.attach() unless @taskList.isOnDom()
         return @taskList.cancel()
 
-    checkSelect:(evt) ->
-        if evt.which == 13
-            @startProcess()
-            @input.blur()
-            return false
 
     # adds an entry to the log
     # converts all newlines to <br>
@@ -97,10 +99,9 @@ module.exports = class ResultsView extends View
     emptyPanel: ->
         @errors.empty()
 
-
+    # returns a JSON object representing the state of the view
     serialize: ->
         return taskList: @taskList.serialize()
-
 
     # launches an Atom BufferedProcess
     gruntTask:(task, path) ->
@@ -121,4 +122,5 @@ module.exports = class ResultsView extends View
                 stdout: stdout.bind @
                 exit: exit.bind @
         catch e
+            # this never gets caught...
             @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"

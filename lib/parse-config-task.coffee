@@ -1,4 +1,9 @@
-# Nicholas Clawson - 05/02/2014 #
+###
+Nicholas Clawson -2014
+
+To be launched by an Atom Task, uses packages own grunt
+installation to parse a projects Gruntfile
+###
 
 grunt = require 'grunt'
 
