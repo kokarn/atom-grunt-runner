@@ -1,19 +1,20 @@
 # Nicholas Clawson - 05/02/2014 #
 
 {View, BufferedProcess, Task} = require 'atom'
+ListView = require './task-list-view'
 
 module.exports = class ResultsView extends View
 
     path: null,
     process: null,
+    taskList: null,
 
     # html layout
     @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
             @div class: 'grunt-panel-heading', =>
-                @input keydown: 'checkSelect', outlet:'input', class: 'editor mini editor-colors', value: 'default'
                 @div outlet:'status', class: 'btn-group', =>
-                    @button outlet:'startbtn', click:'startProcess', class:'btn', 'Start Grunt'
+                    @button outlet:'startbtn', click:'openList', class:'btn', 'Start Grunt'
                     @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
                     @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
                     @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
@@ -27,6 +28,8 @@ module.exports = class ResultsView extends View
         @path = atom.project.getPath();
         view = @
 
+        @taskList = window.list = new ListView @startProcess.bind @
+
         @stopbtn.setTooltip "",
             command: 'grunt-runner:stop'
 
@@ -36,6 +39,8 @@ module.exports = class ResultsView extends View
         @panelbtn.setTooltip "",
             command: 'grunt-runner:toggle-panel'
 
+        @startProcess 'default'
+
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
             {error, tasks} = results
 
@@ -43,19 +48,19 @@ module.exports = class ResultsView extends View
                 console.warn "grunt-runner: #{error}"
             else
                 view.togglePanel()
-                tasks.forEach (task) ->
-                    console.log task
-                    #view.tasks.append "<li>#{task}</li>"
+                view.taskList.setItems tasks
+
+    openList: ->
+        @taskList.attach();
 
     # called to start the process
     # task name is gotten from the input element
-    startProcess: ->
+    startProcess:(task) ->
         @stopProcess()
         @emptyPanel()
         @toggleLog() if @panel.hasClass 'closed'
         @status.attr 'data-status', 'loading'
 
-        task = @input[0].value
         @addLine "Running : grunt #{task}", 'subtle'
 
         @gruntTask task, @path
@@ -100,7 +105,7 @@ module.exports = class ResultsView extends View
 
     # launches an Atom BufferedProcess
     gruntTask:(task, path) ->
-
+        console.log 'running task ' + task + ' - ' + path
         stdout = (out) ->
             # removed color commands,  borrowed from
             # https://github.com/Filirom1/stripcolorcodes (MIT license)
@@ -112,7 +117,7 @@ module.exports = class ResultsView extends View
 
         @process = new BufferedProcess
             command: 'grunt'
-            args: [task]
-            options: {cwd: path}
+            args: []
+            options: {cwd: path + '/'}
             stdout: stdout.bind @
             exit: exit.bind @
