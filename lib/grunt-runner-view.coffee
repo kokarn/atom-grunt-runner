@@ -12,8 +12,8 @@ module.exports = class ResultsView extends View
     # html layout
     @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
-            @div class: 'grunt-panel-heading', =>
-                @div outlet:'status', class: 'btn-group', =>
+            @div outlet:'status', class: 'grunt-panel-heading', =>
+                @div class: 'btn-group', =>
                     @button outlet:'startbtn', click:'openList', class:'btn', 'Start Grunt'
                     @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
                     @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
@@ -30,6 +30,9 @@ module.exports = class ResultsView extends View
 
         @taskList = window.list = new ListView @startProcess.bind @
 
+        @startbtn.setTooltip "",
+            command: 'grunt-runner:run'
+
         @stopbtn.setTooltip "",
             command: 'grunt-runner:stop'
 
@@ -38,8 +41,6 @@ module.exports = class ResultsView extends View
 
         @panelbtn.setTooltip "",
             command: 'grunt-runner:toggle-panel'
-
-        @startProcess 'default'
 
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
             {error, tasks} = results
@@ -67,7 +68,7 @@ module.exports = class ResultsView extends View
 
     # stops the current process if it is running
     stopProcess: ->
-        @addLine 'Grunt task was ended', 'warning' unless @process?.killed
+        @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed
         @process?.kill()
         @process = null
         @status.attr 'data-status', null
@@ -105,7 +106,6 @@ module.exports = class ResultsView extends View
 
     # launches an Atom BufferedProcess
     gruntTask:(task, path) ->
-        console.log 'running task ' + task + ' - ' + path
         stdout = (out) ->
             # removed color commands,  borrowed from
             # https://github.com/Filirom1/stripcolorcodes (MIT license)
@@ -115,9 +115,12 @@ module.exports = class ResultsView extends View
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
             @status.attr 'data-status', if code == 0 then 'ready' else 'error'
 
-        @process = new BufferedProcess
-            command: 'grunt'
-            args: []
-            options: {cwd: path + '/'}
-            stdout: stdout.bind @
-            exit: exit.bind @
+        try
+            @process = new BufferedProcess
+                command: 'grunt'
+                args: [task]
+                options: {cwd: path}
+                stdout: stdout.bind @
+                exit: exit.bind @
+        catch e
+            @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"

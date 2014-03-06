@@ -6,20 +6,20 @@ module.exports = class TaskListView extends SelectListView
         super
 
 
-        _this = @
+        _this = window.test = @
         this.filterEditorView.on 'keydown', (evt) ->
-            _this.confirmText this.value if evt.which == 13
+            text = _this.filterEditorView.getEditor().getBuffer().getText()
+            _this.confirmed text if evt.which == 13 and text != ""
 
         @callback = callback
         @addClass 'overlay from-top'
         @setMaxItems 5
 
     confirmed:(item) ->
-        console.log item
+        @items = [item].concat @items.filter (value) ->
+            item != value
+        @cancel()
         @callback item
-
-    confirmText:(text) ->
-        @confirmed text
 
     attach: ->
         @populateList()
@@ -29,3 +29,5 @@ module.exports = class TaskListView extends SelectListView
     viewForItem:(task) ->
         $$ ->
             @li task
+    getEmptyMessage: ->
+        "Press Enter to run the task."
