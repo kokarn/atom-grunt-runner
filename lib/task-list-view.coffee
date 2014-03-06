@@ -2,15 +2,19 @@
 
 module.exports = class TaskListView extends SelectListView
 
-    initialize:(callback) ->
+    callback: ->
+    items: []
+
+    initialize:(callback, state = {}) ->
         super
 
-        @items = []
         @callback = callback
+        @setItems if Array.isArray state.items then state.items else []
+
         @addClass 'overlay from-top'
         @setMaxItems 5
 
-        _this = window.test = @
+        _this = @
         this.filterEditorView.on 'keydown', (evt) ->
             if evt.which == 13
                 selected = _this.getSelectedItem()
@@ -18,9 +22,15 @@ module.exports = class TaskListView extends SelectListView
 
                 _this.confirmed if selected then selected else text
 
-    confirmed:(item) ->
+    addItem:(item) ->
         @items = [item].concat @items.filter (value) ->
             item != value
+
+    addItems:(items) ->
+        @addItem item for item in items
+
+    confirmed:(item) ->
+        @addItem item
         @cancel()
         @callback item
 
@@ -29,8 +39,8 @@ module.exports = class TaskListView extends SelectListView
         atom.workspaceView.append @
         @focusFilterEditor()
 
-    destroy: ->
-        @detach()
+    serialize: ->
+        return items: @items.slice 0, 4
 
     viewForItem:(task) ->
         $$ ->

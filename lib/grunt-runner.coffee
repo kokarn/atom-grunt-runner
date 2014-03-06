@@ -6,30 +6,25 @@ module.exports =
     configDefaults:
         gruntPaths: []
 
-    activate:(state = {}) ->
-        # all this stuff to make local grunt paths work
-        # IT'S SO UGLY
-        # TODO figure out a better way
-        originalPath = process.env.PATH
-        gruntPaths = atom.config.get('grunt-runner').gruntPaths
-        gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
-        process.env.PATH = originalPath + (if gruntPaths.length > 0 then ':' else '') + gruntPaths.join ':'
-        atom.config.observe 'grunt-runner.gruntPaths', ->
-            gruntPaths = atom.config.get('grunt-runner').gruntPaths
-            gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
-            process.env.PATH = originalPath + (if gruntPaths.length > 0 then ':' else '') + gruntPaths.join ':'
+    originalPath: ''
 
-        @view = view = new View()
+    activate:(state = {}) ->
+        @originalPath = process.env.PATH
+        atom.config.observe 'grunt-runner.gruntPaths', @updateSettings.bind @
+
+        @view = new View(state)
         atom.workspaceView.command 'grunt-runner:stop', @view.stopProcess.bind @view
         atom.workspaceView.command 'grunt-runner:toggle-log', @view.toggleLog.bind @view
         atom.workspaceView.command 'grunt-runner:toggle-panel', @view.togglePanel.bind @view
-        atom.workspaceView.command 'grunt-runner:run', ->
-            return view.taskList.attach() unless view.taskList.isOnDom()
-            return view.taskList.cancel()
+        atom.workspaceView.command 'grunt-runner:run', @view.toggleTaskList.bind @view
 
+    updateSettings: ->
+        gruntPaths = atom.config.get('grunt-runner').gruntPaths
+        gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
+        process.env.PATH = @originalPath + (if gruntPaths.length > 0 then ':' else '') + gruntPaths.join ':'
 
     serialize: ->
         @view.serialize()
 
-    destroy: ->
+    deactivate: ->
         @view.stopProcess()

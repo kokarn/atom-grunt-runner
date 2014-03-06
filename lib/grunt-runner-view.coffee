@@ -28,28 +28,21 @@ module.exports = class ResultsView extends View
         @path = atom.project.getPath();
         view = @
 
-        @taskList = window.list = new ListView @startProcess.bind @
+        @taskList = new ListView @startProcess.bind(@), state.taskList
 
-        @startbtn.setTooltip "",
-            command: 'grunt-runner:run'
-
-        @stopbtn.setTooltip "",
-            command: 'grunt-runner:stop'
-
-        @logbtn.setTooltip "",
-            command: 'grunt-runner:toggle-log'
-
-        @panelbtn.setTooltip "",
-            command: 'grunt-runner:toggle-panel'
-
-        Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', (results)->
-            {error, tasks} = results
+        Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', ({error, tasks})->
+            view.startbtn.setTooltip "", command: 'grunt-runner:run'
+            view.stopbtn.setTooltip "", command: 'grunt-runner:stop'
+            view.logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
+            view.panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
 
             if error
                 console.warn "grunt-runner: #{error}"
+                view.addLine "Error loading gruntfile: #{error}", "error"
+                view.toggleLog()
             else
                 view.togglePanel()
-                view.taskList.setItems tasks
+                view.taskList.addItems tasks
 
     openList: ->
         @taskList.attach();
@@ -81,6 +74,10 @@ module.exports = class ResultsView extends View
     toggleLog: ->
         @panel.toggleClass 'closed'
 
+    toggleTaskList: ->
+        return @taskList.attach() unless @taskList.isOnDom()
+        return @taskList.cancel()
+
     checkSelect:(evt) ->
         if evt.which == 13
             @startProcess()
@@ -100,9 +97,10 @@ module.exports = class ResultsView extends View
     emptyPanel: ->
         @errors.empty()
 
-    # TODO
+
     serialize: ->
-        return {}
+        return taskList: @taskList.serialize()
+
 
     # launches an Atom BufferedProcess
     gruntTask:(task, path) ->
