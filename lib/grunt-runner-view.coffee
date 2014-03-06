@@ -10,12 +10,13 @@ module.exports = class ResultsView extends View
     # html layout
     @content: ->
         @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
-            @div outlet: 'status', class: 'panel-heading', =>
+            @div class: 'grunt-panel-heading', =>
                 @input keydown: 'checkSelect', outlet:'input', class: 'editor mini editor-colors', value: 'default'
-                @button outlet:'startbtn', click:'startProcess', class:'btn key-bindings', 'Start Grunt'
-                @button outlet:'stopbtn', click:'stopProcess', class:'btn key-bindings', 'Stop Grunt'
-                @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
-                @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
+                @div outlet:'status', class: 'btn-group', =>
+                    @button outlet:'startbtn', click:'startProcess', class:'btn', 'Start Grunt'
+                    @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
+                    @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
+                    @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
             @div outlet:'panel', class: 'panel-body padded closed', =>
                 @ul outlet:'errors', class: 'list-group'
 
