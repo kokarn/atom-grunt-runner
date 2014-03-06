@@ -25,7 +25,7 @@ module.exports =
         atom.workspaceView.command 'grunt-runner:toggle-panel', @view.togglePanel.bind @view
         atom.workspaceView.command 'grunt-runner:run', ->
             return view.taskList.attach() unless view.taskList.isOnDom()
-            return view.taskList.detach()
+            return view.taskList.cancel()
 
 
     serialize: ->
