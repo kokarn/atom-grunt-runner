@@ -12,8 +12,11 @@ module.exports = class TaskListView extends SelectListView
 
         _this = window.test = @
         this.filterEditorView.on 'keydown', (evt) ->
-            text = _this.filterEditorView.getEditor().getBuffer().getText()
-            _this.confirmed text if evt.which == 13 and text != ""
+            if evt.which == 13
+                selected = _this.getSelectedItem()
+                text = _this.filterEditorView.getEditor().getBuffer().getText()
+
+                _this.confirmed if selected then selected else text
 
     confirmed:(item) ->
         @items = [item].concat @items.filter (value) ->
