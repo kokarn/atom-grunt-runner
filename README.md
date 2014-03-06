@@ -1,4 +1,4 @@
-[grunt-runner](https://atom.io/packages/grunt-runner) (WIP)
+[grunt-runner](https://atom.io/packages/grunt-runner)
 ================
 
 Build your project using Grunt from Atom.
@@ -11,8 +11,9 @@ Build your project using Grunt from Atom.
  * Open a project that has a `Gruntfile.js` in the root.
  * Open the task list (`ctrl-alt-g`) and choose a task to run, or input a new one.
  * The output from the grunt task will be shown in bottom toolbar. Toggle
- the log with `ctrl-alt-t`. You can also toggle the entire toolbar with
- `ctrl-alt-shift-t`.
+ the log with `ctrl-alt-t`, toggle the entire toolbar with
+ `ctrl-alt-shift-t`. The toolbar will appear automatically if Grunt Runner was able to find and
+ parse a `Gruntfile`, otherwise you can toggle it on yourself.
  * If your task doesn't end automatically (e.g. watches files for changes) you
  can force it stop from the toolbar or by pressing `ctrl-alt-shift-g`.
 
@@ -35,3 +36,7 @@ Or install it from the Atom Package Manager.
  * Tasks added to a Gruntfile will not be automatically added until the project
  is reloaded or the page gets refreshed. They will still be callable from from
  the toolbar.
+
+ * Currently hard to add tasks that prefix another task. For example, if you
+ have a task in the task list called `develop`, it is impossible to add or call
+ a task called `dev`
