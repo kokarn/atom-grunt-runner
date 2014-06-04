@@ -93,9 +93,10 @@ module.exports = class ResultsView extends View
         text = text.replace /\ /g, '&nbsp;'
         text = @colorize text
         text = text.trim().replace /[\r\n]+/g, '<br />'
-        stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
-        errorList.append "<li class='text-#{type}'>#{text}</li>"
-        panel.scrollTop errorList.height() if stuckToBottom
+        if not text.empty
+            stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
+            errorList.append "<li class='text-#{type}'>#{text}</li>"
+            panel.scrollTop errorList.height() if stuckToBottom
 
     # clears the log
     emptyPanel: ->
