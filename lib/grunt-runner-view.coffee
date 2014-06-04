@@ -7,7 +7,7 @@ discover the projects grunt commands. Logs errors and output.
 Also launches an Atom BufferedProcess to run grunt when needed.
 ###
 
-{View, BufferedProcess, Task} = require 'atom'
+{View, BufferedProcess, Task, $} = require 'atom'
 ListView = require './task-list-view'
 
 module.exports = class ResultsView extends View
@@ -18,15 +18,17 @@ module.exports = class ResultsView extends View
 
     # html layout
     @content: ->
-        @div class: 'grunt-runner-results tool-panel panel-bottom native-key-bindings', =>
-            @div outlet:'status', class: 'grunt-panel-heading', =>
-                @div class: 'btn-group', =>
-                    @button outlet:'startbtn', click:'toggleTaskList', class:'btn', 'Start Grunt'
-                    @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
-                    @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
-                    @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
-            @div outlet:'panel', class: 'panel-body padded closed', =>
-                @ul outlet:'errors', class: 'list-group'
+        @div class: 'grunt-runner-resizer tool-panel panel-bottom', =>
+          @div class: 'grunt-runner-resizer-handle'
+          @div class: 'grunt-runner-results tool-panel native-key-bindings', =>
+              @div outlet:'status', class: 'grunt-panel-heading', =>
+                  @div class: 'btn-group', =>
+                      @button outlet:'startbtn', click:'toggleTaskList', class:'btn', 'Start Grunt'
+                      @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
+                      @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
+                      @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
+              @div outlet:'panel', class: 'panel-body padded closed', =>
+                  @ul outlet:'errors', class: 'list-group'
 
     # called after the view is constructed
     # gets the projects current path and launches a task
@@ -34,6 +36,7 @@ module.exports = class ResultsView extends View
     initialize:(state = {}) ->
         @path = atom.project.getPath();
         @taskList = new ListView @startProcess.bind(@), state.taskList
+        @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
         view = @
         Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', ({error, tasks})->
@@ -147,3 +150,15 @@ module.exports = class ResultsView extends View
         catch e
             # this never gets caught...
             @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"
+
+    resizeStarted: =>
+        $(document.body).on('mousemove', @resizeGruntRunnerView)
+        $(document.body).on('mouseup', @resizeStopped)
+
+    resizeStopped: =>
+        $(document.body).off('mousemove', @resizeGruntRunnerView)
+        $(document.body).off('mouseup', @resizeStopped)
+
+    resizeGruntRunnerView:(event) =>
+        height = $(document.body).height() - event.pageY - $('.status-bar').height()
+        @height(height)
