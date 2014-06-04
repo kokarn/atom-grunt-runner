@@ -90,6 +90,8 @@ module.exports = class ResultsView extends View
     # converts all newlines to <br>
     addLine:(text, type = "plain") ->
         [panel, errorList] = [@panel, @errors]
+        text = text.replace /\ /g, '&nbsp;'
+        text = @colorize text
         text = text.trim().replace /[\r\n]+/g, '<br />'
         stuckToBottom = errorList.height() - panel.height() - panel.scrollTop() == 0
         errorList.append "<li class='text-#{type}'>#{text}</li>"
@@ -103,12 +105,32 @@ module.exports = class ResultsView extends View
     serialize: ->
         return taskList: @taskList.serialize()
 
+    # bash colors to html
+    colorize:(text) ->
+        text = text.replace /\[1m(.+?)(\[.+?)/g, '<span class="strong">$1</span>$2'
+        text = text.replace /\[4m(.+?)(\[.+?)/g, '<span class="underline">$1</span>$2'
+        text = text.replace /\[31m(.+?)(\[.+?)/g, '<span class="red">$1</span>$2'
+        text = text.replace /\[32m(.+?)(\[.+?)/g, '<span class="green">$1</span>$2'
+        text = text.replace /\[33m(.+?)(\[.+?)/g, '<span class="yellow">$1</span>$2'
+        text = text.replace /\[36m(.+?)(\[.+?)/g, '<span class="cyan">$1</span>$2'
+        text = text.replace /\[90m(.+?)(\[.+?)/g, '<span class="gray">$1</span>$2'
+        text = @stripColorCodes text
+        return text
+
+    # remove invalid color codes
+    stripColorCodes:(text) ->
+        return text.replace /\[[0-9]{1,2}m/g, ''
+
+    # removed color commands
+    stripColors:(text) ->
+        # borrowed from
+        # https://github.com/Filirom1/stripcolorcodes (MIT license)
+        return text.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
+
     # launches an Atom BufferedProcess
     gruntTask:(task, path) ->
         stdout = (out) ->
-            # removed color commands,  borrowed from
-            # https://github.com/Filirom1/stripcolorcodes (MIT license)
-            @addLine out.replace /\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, ''
+            @addLine out
         exit = (code) ->
             atom.beep() unless code == 0
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
