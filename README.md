@@ -8,7 +8,11 @@ Build your project using Grunt from Atom.
 ## How to use
  * Set a path to your local `grunt-cli` in the settings
  (may not be necessary).
- * Open a project that has a `Gruntfile.js` in the root.
+ * Set the relative path of Gruntfile in the settings
+ if the Gruntfile.coffe(js) is NOT in the root directory of your project workspace.
+>For Exmaple, if Gruntfile.coffee(or .js) is in your project/workspace/path/build,
+then type `build/` here.
+ * Open a project that has a `Gruntfile.js` or `Gruntfile.coffee` in the root
  * Open the task list (`ctrl-alt-g`) and choose a task to run, or input a new one.
  * The output from the grunt task will be shown in bottom toolbar. Toggle
  the log with `ctrl-alt-t`, toggle the entire toolbar with
@@ -28,10 +32,6 @@ Install Grunt Runner package using the command line
 Or install it from the Atom Package Manager.
 
 ## Known issues
-
- * The Gruntfile must be in the root of your project directory to successfully
- get the available tasks. Additionally, all `grunt` commands will be called
- in the root directory.
 
  * Tasks added to a Gruntfile will not be automatically added until the project
  is reloaded or the page gets refreshed. They will still be callable from from
