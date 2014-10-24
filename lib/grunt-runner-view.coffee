@@ -31,29 +31,47 @@ module.exports = class ResultsView extends View
                   @ul outlet:'errors', class: 'list-group'
 
     # called after the view is constructed
-    # gets the projects current path and launches a task
-    # to parse the projects gruntfile if it exists
+    # initialize list and triggers processing of the gruntfile
     initialize:(state = {}) ->
-        @path = atom.project.getPath();
+        view = @
+
+        atom.project.on 'path-changed', -> view.parseGruntFile()
+
         @taskList = new ListView @startProcess.bind(@), state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
-        view = @
-        Task.once require.resolve('./parse-config-task'), atom.project.getPath()+'/gruntfile', ({error, tasks})->
-            # now that we're ready, add some tooltips
-            view.startbtn.setTooltip "", command: 'grunt-runner:run'
-            view.stopbtn.setTooltip "", command: 'grunt-runner:stop'
-            view.logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
-            view.panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
+        @startbtn.setTooltip "", command: 'grunt-runner:run'
+        @stopbtn.setTooltip "", command: 'grunt-runner:stop'
+        @logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
+        @panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
 
-            # log error or add panel to workspace
-            if error
-                console.warn "grunt-runner: #{error}"
-                view.addLine "Error loading gruntfile: #{error}", "error"
-                view.toggleLog()
-            else
-                view.togglePanel()
-                view.taskList.addItems tasks
+        @parseGruntFile()
+
+
+    # launches a task to parse the projects gruntfile if it exists
+    parseGruntFile: ->
+        @path = atom.project.getPath()
+        view = @
+
+        # clear panel output and tasklist items
+        @emptyPanel()
+        @taskList.clearItems()
+        @status.attr 'data-status', null
+
+        if !@path
+            @addLine "No project opened."
+        else
+            Task.once require.resolve('./parse-config-task'), @path+'/gruntfile', ({error, tasks})->
+
+                # log error or add panel to workspace
+                if error
+                    console.warn "grunt-runner: #{error}"
+                    view.addLine "Error loading gruntfile: #{error}", "error"
+                    view.toggleLog()
+                else
+                    view.addLine "Grunt file parsed, found #{tasks.length} tasks"
+                    view.togglePanel()
+                    view.taskList.addItems tasks
 
     # called to start the process
     # task name is gotten from the input element

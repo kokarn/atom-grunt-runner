@@ -42,6 +42,10 @@ module.exports = class TaskListView extends SelectListView
     addItems:(items) ->
         @addItem item for item in items
 
+    # clears items
+    clearItems: ->
+        @items = []
+  
     # called when an Item is selected
     confirmed:(item) ->
         @addItem item
