@@ -135,6 +135,8 @@ module.exports = class ResultsView extends View
     gruntTask:(task, path) ->
         stdout = (out) ->
             @addLine out
+        stderr = (err) ->
+            @addLine err, 'error'
         exit = (code) ->
             atom.beep() unless code == 0
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
