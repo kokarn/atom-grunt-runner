@@ -9,9 +9,17 @@ grunt = require 'grunt'
 
 # attempts to load the gruntfile
 module.exports = (path) ->
+    var fn;
+
+    try 
+        fn = require(path);
+    catch e
+    
+    if !fn then return {error: "Gruntfile not found."} 
+    
     try
-        require(path)(grunt)
+        fn(grunt)
     catch e
         error = e.code
 
-    return {error: error, tasks: Object.keys grunt.task._tasks}
+    return {error: "Error parsing Gruntfile. " + e.message, tasks: Object.keys grunt.task._tasks}
