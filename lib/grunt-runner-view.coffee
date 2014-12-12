@@ -9,12 +9,14 @@ Also launches an Atom BufferedProcess to run grunt when needed.
 
 {View, BufferedProcess, Task, $} = require 'atom'
 ListView = require './task-list-view'
+path = require 'path'
 
 module.exports = class ResultsView extends View
 
     path: null,
     process: null,
     taskList: null,
+    gruntfileRelativePath:null
 
     # html layout
     @content: ->
@@ -34,7 +36,9 @@ module.exports = class ResultsView extends View
     # gets the projects current path and launches a task
     # to parse the projects gruntfile if it exists
     initialize:(state = {}) ->
-        @path = atom.project.getPath();
+        @gruntfileRelativePath = atom.config.get('grunt-runner').gruntfileRelativePath unless @gruntfileRelativePath
+        @path = if @gruntfileRelativePath then path.join(atom.project.getPath(),@gruntfileRelativePath) else atom.project.getPath()
+
         @taskList = new ListView @startProcess.bind(@), state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
