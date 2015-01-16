@@ -75,17 +75,17 @@ module.exports = class ResultsView extends View
 
         @addLine "Running : grunt #{task}", 'subtle'
 
-        @.setStartStopBtn false
+        @.setStartStopBtn true
 
         @gruntTask task, @path
 
     # stops the current process if it is running
-    stopProcess: ->
-        @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed
+    stopProcess:(noMessage) ->
+        @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed and not noMessage
         @process?.kill()
         @process = null
         @status.attr 'data-status', null
-        @.setStartStopBtn true
+        @.setStartStopBtn false
 
     # toggles the visibility of the entire panel
     togglePanel: ->
@@ -154,7 +154,7 @@ module.exports = class ResultsView extends View
             atom.beep() unless code == 0
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
             @status.attr 'data-status', if code == 0 then 'ready' else 'error'
-            @.setStartStopBtn false
+            @stopProcess true
 
         try
             @process = new BufferedProcess
@@ -166,7 +166,7 @@ module.exports = class ResultsView extends View
         catch e
             # this never gets caught...
             @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"
-            @.setStartStopBtn false
+            @stopProcess()
 
     resizeStarted: =>
         $(document.body).on('mousemove', @resizeGruntRunnerView)
