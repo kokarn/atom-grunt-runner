@@ -1,4 +1,4 @@
-'.workspace':
+'atom-workspace':
   'ctrl-alt-g': 'grunt-runner:run'
   'ctrl-alt-G': 'grunt-runner:stop'
   'ctrl-alt-t': 'grunt-runner:toggle-log'
