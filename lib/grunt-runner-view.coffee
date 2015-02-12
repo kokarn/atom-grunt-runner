@@ -39,8 +39,7 @@ module.exports = class ResultsView extends View
         @taskList = new ListView @startProcess.bind(@), state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
-        @startbtn.setTooltip "", command: 'grunt-runner:run'
-        @stopbtn.setTooltip "", command: 'grunt-runner:stop'
+        @startstopbtn.setTooltip "Start", command: 'grunt-runner:run'
         @logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
         @panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
 

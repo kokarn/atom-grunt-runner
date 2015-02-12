@@ -15,7 +15,7 @@ module.exports =
 
     # creates grunt-runner view andstarts listening for commands
     activate:(state = {}) ->
-        @originalPath = process.env.PATH
+        @originalPath = process.env.NODE_PATH
         atom.config.observe 'grunt-runner.gruntPaths', @updateSettings.bind @
 
         @view = new View(state)
@@ -29,7 +29,9 @@ module.exports =
     updateSettings: ->
         gruntPaths = atom.config.get('grunt-runner').gruntPaths
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
-        process.env.PATH = @originalPath + (if gruntPaths.length > 0 then ':' else '') + gruntPaths.join ':'
+        systemPaths = process.env.NODE_PATH.split(':')
+        paths = systemPaths.concat(gruntPaths)
+        process.env.NODE_PATH = paths.join(':')
 
     # returns a JSON object representing the packages state
     serialize: ->
