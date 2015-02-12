@@ -23,8 +23,7 @@ module.exports = class ResultsView extends View
           @div class: 'grunt-runner-results tool-panel native-key-bindings', =>
               @div outlet:'status', class: 'grunt-panel-heading', =>
                   @div class: 'btn-group', =>
-                      @button outlet:'startbtn', click:'toggleTaskList', class:'btn', 'Start Grunt'
-                      @button outlet:'stopbtn', click:'stopProcess', class:'btn', 'Stop Grunt'
+                      @button outlet:'startstopbtn', click:'startStopAction', class:'btn', 'Start Grunt'
                       @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
                       @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
               @div outlet:'panel', class: 'panel-body padded closed', =>
@@ -73,6 +72,18 @@ module.exports = class ResultsView extends View
                     view.togglePanel()
                     view.taskList.addItems tasks
 
+    startStopAction: ->
+        return @toggleTaskList() if @process == null
+        return @stopProcess()
+
+    setStartStopBtn:(isRunning) ->
+        if isRunning
+            @.startstopbtn.text 'Stop'
+            @.startstopbtn.setTooltip "", command: 'grunt-runner:stop'
+        else
+            @.startstopbtn.text 'Start'
+            @.startstopbtn.setTooltip "", command: 'grunt-runner:run'
+
     # called to start the process
     # task name is gotten from the input element
     startProcess:(task) ->
@@ -83,14 +94,17 @@ module.exports = class ResultsView extends View
 
         @addLine "Running : grunt #{task}", 'subtle'
 
+        @.setStartStopBtn true
+
         @gruntTask task, @path
 
     # stops the current process if it is running
-    stopProcess: ->
-        @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed
+    stopProcess:(noMessage) ->
+        @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed and not noMessage
         @process?.kill()
         @process = null
         @status.attr 'data-status', null
+        @.setStartStopBtn false
 
     # toggles the visibility of the entire panel
     togglePanel: ->
@@ -159,6 +173,7 @@ module.exports = class ResultsView extends View
             atom.beep() unless code == 0
             @addLine "Grunt exited: code #{code}.", if code == 0 then 'success' else 'error'
             @status.attr 'data-status', if code == 0 then 'ready' else 'error'
+            @stopProcess true
 
         try
             @process = new BufferedProcess
@@ -170,6 +185,7 @@ module.exports = class ResultsView extends View
         catch e
             # this never gets caught...
             @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"
+            @stopProcess()
 
     resizeStarted: =>
         $(document.body).on('mousemove', @resizeGruntRunnerView)

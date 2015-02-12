@@ -20,6 +20,7 @@
 
     .grunt-panel-heading {
         padding: 8px !important;
+        float: left;
 
         &:before {
             font-family: 'Octicons Regular';
@@ -46,10 +47,18 @@
             color: red;
             content: "\f02d";
         }
+
+        .btn-group {
+            width: 100px;
+        }
+
+        .btn-group .btn {
+            width: 100%;
+        }
     }
 
     .panel-body {
-        max-height: e( "calc( 100% - 36px )" );
+        max-height: e( "calc( 100% )" );
         overflow-y: scroll;
 
         li {
