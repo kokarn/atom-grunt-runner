@@ -57,6 +57,10 @@
         }
     }
 
+    &.closed .btn-group, &.closed .btn {
+        width: auto !important;
+    }
+
     .panel-body {
         max-height: e( "calc( 100% )" );
         overflow-y: scroll;
@@ -100,9 +104,7 @@
         }
     }
 
-    .panel-body.closed{
-        padding: 0px;
-        max-height: 0px;
-        margin-top: -1px;
+    &.closed .panel-body{
+        display: none;
     }
 }

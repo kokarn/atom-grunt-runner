@@ -11,27 +11,15 @@ module.exports =
     configDefaults:
         gruntPaths: []
 
-    originalPath: ''
-
     # creates grunt-runner view andstarts listening for commands
     activate:(state = {}) ->
-        @originalPath = process.env.NODE_PATH
-        atom.config.observe 'grunt-runner.gruntPaths', @updateSettings.bind @
-
         @view = new View(state)
+        atom.config.observe 'grunt-runner.gruntPaths', @view.parseGruntFile.bind @view
         atom.workspaceView.command 'grunt-runner:stop', @view.stopProcess.bind @view
         atom.workspaceView.command 'grunt-runner:toggle-log', @view.toggleLog.bind @view
         atom.workspaceView.command 'grunt-runner:toggle-panel', @view.togglePanel.bind @view
         atom.workspaceView.command 'grunt-runner:run', @view.toggleTaskList.bind @view
 
-    # called whenever the settings for grunt runner changes
-    # updates the env.process.PATH value to include custom paths
-    updateSettings: ->
-        gruntPaths = atom.config.get('grunt-runner').gruntPaths
-        gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
-        systemPaths = process.env.NODE_PATH.split(':')
-        paths = systemPaths.concat(gruntPaths)
-        process.env.NODE_PATH = paths.join(':')
 
     # returns a JSON object representing the packages state
     serialize: ->

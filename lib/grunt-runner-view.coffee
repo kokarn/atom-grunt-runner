@@ -16,17 +16,20 @@ module.exports = class ResultsView extends View
     process: null,
     taskList: null,
 
+    originalPaths: process.env.NODE_PATH.split(':'),
+
+
     # html layout
     @content: ->
         @div class: 'grunt-runner-resizer tool-panel panel-bottom', =>
           @div class: 'grunt-runner-resizer-handle'
-          @div class: 'grunt-runner-results tool-panel native-key-bindings', =>
+          @div outlet: 'container', class: 'grunt-runner-results tool-panel native-key-bindings', =>
               @div outlet:'status', class: 'grunt-panel-heading', =>
                   @div class: 'btn-group', =>
                       @button outlet:'startstopbtn', click:'startStopAction', class:'btn', 'Start Grunt'
                       @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
                       @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
-              @div outlet:'panel', class: 'panel-body padded closed', =>
+              @div outlet:'panel', class: 'panel-body padded', =>
                   @ul outlet:'errors', class: 'list-group'
 
     # called after the view is constructed
@@ -43,12 +46,15 @@ module.exports = class ResultsView extends View
         @logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
         @panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
 
-        @parseGruntFile()
-
 
     # launches a task to parse the projects gruntfile if it exists
-    parseGruntFile: ->
+    parseGruntFile:(starting) ->
         @path = atom.project.getPath()
+
+        gruntPaths = atom.config.get('grunt-runner').gruntPaths
+        gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
+        paths = @originalPaths.concat(gruntPaths, [@path + '/node_modules'])
+        process.env.NODE_PATH = paths.join(':')
         view = @
 
         # clear panel output and tasklist items
@@ -63,7 +69,6 @@ module.exports = class ResultsView extends View
 
                 # log error or add panel to workspace
                 if error
-                    console.warn "grunt-runner: #{error}"
                     view.addLine "Error loading gruntfile: #{error}", "error"
                     view.toggleLog()
                 else
@@ -88,7 +93,6 @@ module.exports = class ResultsView extends View
     startProcess:(task) ->
         @stopProcess()
         @emptyPanel()
-        @toggleLog() if @panel.hasClass 'closed'
         @status.attr 'data-status', 'loading'
 
         @addLine "Running : grunt #{task}", 'subtle'
@@ -112,7 +116,11 @@ module.exports = class ResultsView extends View
 
     # toggles the visibility of the log
     toggleLog: ->
-        @panel.toggleClass 'closed'
+        @container.toggleClass 'closed'
+        if @container.hasClass 'closed'
+            @container.parent().height 'auto'
+        else
+            @container.parent().height '110px'
 
     # toggles the visibility of the tasklist
     toggleTaskList: ->
