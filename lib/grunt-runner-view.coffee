@@ -111,7 +111,7 @@ module.exports = class ResultsView extends View
 
     # toggles the visibility of the entire panel
     togglePanel: ->
-        return atom.workspaceView.prependToBottom @ unless @.isOnDom()
+        return atom.workspace.addBottomPanel(item: this) unless @.isOnDom()
         return @detach() if @.isOnDom()
 
     # toggles the visibility of the log

@@ -56,7 +56,8 @@ module.exports = class TaskListView extends SelectListView
     # makes sure to fill list up and set focus on editor
     attach: ->
         @populateList()
-        atom.workspaceView.append @
+        @panel ?= atom.workspace.addModalPanel(item: this)
+        @panel.show()
         @focusFilterEditor()
 
     # returns JSON object representing state
