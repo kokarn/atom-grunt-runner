@@ -23,6 +23,7 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "grunt": "~0.4.2"
+    "grunt": "~0.4.2",
+    "atom-space-pen-views": "^2.0.4"
   }
 }
