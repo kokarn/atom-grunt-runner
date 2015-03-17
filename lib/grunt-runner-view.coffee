@@ -15,6 +15,7 @@ module.exports = class ResultsView extends View
     path: null,
     process: null,
     taskList: null,
+    tasks: [],
 
     originalPaths: process.env.NODE_PATH.split(':'),
 
@@ -39,7 +40,7 @@ module.exports = class ResultsView extends View
 
         atom.project.on 'path-changed', -> view.parseGruntFile()
 
-        @taskList = new ListView @startProcess.bind(@), state.taskList
+        @taskList = new ListView state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
         @startstopbtn.setTooltip "Start", command: 'grunt-runner:run'
@@ -59,7 +60,6 @@ module.exports = class ResultsView extends View
 
         # clear panel output and tasklist items
         @emptyPanel()
-        @taskList.clearItems()
         @status.attr 'data-status', null
 
         if !@path
@@ -73,8 +73,8 @@ module.exports = class ResultsView extends View
                     view.toggleLog()
                 else
                     view.addLine "Grunt file parsed, found #{tasks.length} tasks"
+                    view.tasks = tasks
                     view.togglePanel()
-                    view.taskList.addItems tasks
 
     startStopAction: ->
         return @toggleTaskList() if @process == null
@@ -111,7 +111,7 @@ module.exports = class ResultsView extends View
 
     # toggles the visibility of the entire panel
     togglePanel: ->
-        return atom.workspaceView.prependToBottom @ unless @.isOnDom()
+        return atom.workspace.addBottomPanel(item: this) unless @.isOnDom()
         return @detach() if @.isOnDom()
 
     # toggles the visibility of the log
@@ -124,9 +124,7 @@ module.exports = class ResultsView extends View
 
     # toggles the visibility of the tasklist
     toggleTaskList: ->
-        return @taskList.attach() unless @taskList.isOnDom()
-        return @taskList.cancel()
-
+        @taskList.toggle(@)
 
     # adds an entry to the log
     # converts all newlines to <br>
