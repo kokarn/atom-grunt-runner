@@ -7,7 +7,8 @@ discover the projects grunt commands. Logs errors and output.
 Also launches an Atom BufferedProcess to run grunt when needed.
 ###
 
-{View, BufferedProcess, Task, $} = require 'atom'
+{BufferedProcess, Task} = require 'atom'
+{View, $} = require 'atom-space-pen-views'
 ListView = require './task-list-view'
 
 module.exports = class ResultsView extends View
