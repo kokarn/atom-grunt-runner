@@ -39,7 +39,7 @@ module.exports = class ResultsView extends View
     initialize:(state = {}) ->
         view = @
 
-        atom.project.on 'path-changed', -> view.parseGruntFile()
+        atom.project.onDidChangePaths -> view.parseGruntFile()
 
         @taskList = new ListView state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
@@ -58,7 +58,7 @@ module.exports = class ResultsView extends View
 
     # launches a task to parse the projects gruntfile if it exists
     parseGruntFile:(starting) ->
-        @path = atom.project.getPath()
+        @path = atom.project.getPaths()
 
         gruntPaths = atom.config.get('grunt-runner').gruntPaths
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
