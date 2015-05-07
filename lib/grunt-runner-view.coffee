@@ -44,9 +44,16 @@ module.exports = class ResultsView extends View
         @taskList = new ListView state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
-        @startstopbtn.setTooltip "Start", command: 'grunt-runner:run'
-        @logbtn.setTooltip "", command: 'grunt-runner:toggle-log'
-        @panelbtn.setTooltip "", command: 'grunt-runner:toggle-panel'
+        atom.tooltips.add @startstopbtn,
+            title: "Start"
+            keyBindingCommand: 'grunt-runner:run'
+
+        atom.tooltips.add @logbtn,
+            title: ""
+            keyBindingCommand: 'grunt-runner:toggle-log'
+        atom.tooltips.add @panelbtn,
+            title: ""
+            keyBindingCommand: 'grunt-runner:toggle-panel'
 
 
     # launches a task to parse the projects gruntfile if it exists
@@ -84,10 +91,14 @@ module.exports = class ResultsView extends View
     setStartStopBtn:(isRunning) ->
         if isRunning
             @.startstopbtn.text 'Stop'
-            @.startstopbtn.setTooltip "", command: 'grunt-runner:stop'
+            atom.tooltips.add @.startstopbtn,
+                title: ""
+                keyBindingCommand: 'grunt-runner:stop'
         else
             @.startstopbtn.text 'Start'
-            @.startstopbtn.setTooltip "", command: 'grunt-runner:run'
+            atom.tooltips.add @.startstopbtn,
+                title: ""
+                keyBindingCommand: 'grunt-runner:run'
 
     # called to start the process
     # task name is gotten from the input element
