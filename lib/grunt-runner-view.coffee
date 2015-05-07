@@ -58,9 +58,13 @@ module.exports = class ResultsView extends View
 
     # launches a task to parse the projects gruntfile if it exists
     parseGruntFile:(starting) ->
-        @path = atom.project.getPaths()
+        @paths = atom.project.getPaths()
 
         gruntPaths = atom.config.get('grunt-runner').gruntPaths
+        # Assume the "real" paths is the first path.
+        # TODO: Real fix
+        @path = @paths[0]
+
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
         paths = @originalPaths.concat(gruntPaths, [@path + '/node_modules'])
         process.env.NODE_PATH = paths.join(':')
