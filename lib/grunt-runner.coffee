@@ -8,8 +8,10 @@ listening for any commands or changes
 window.View = require './grunt-runner-view.coffee'
 
 module.exports =
-    configDefaults:
-        gruntPaths: []
+    config:
+        gruntPaths:
+            type: 'array'
+            default: []
 
     # creates grunt-runner view and starts listening for commands
     activate:(state = {}) ->
