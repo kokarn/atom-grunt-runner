@@ -67,7 +67,7 @@ module.exports = class ResultsView extends View
         gruntPaths = atom.config.get('grunt-runner.gruntPaths')
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
         paths = @originalPaths.concat(gruntPaths, [@path + '/node_modules'])
-        process.env.NODE_PATH = paths.join(':')
+        process.env.NODE_PATH = paths.join(path.delimiter)
         view = @
 
         # clear panel output and tasklist items
