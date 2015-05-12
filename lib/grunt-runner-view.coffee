@@ -31,7 +31,7 @@ module.exports = class ResultsView extends View
                       @button outlet:'startstopbtn', click:'startStopAction', class:'btn', 'Start Grunt'
                       @button outlet:'logbtn', click:'toggleLog', class:'btn', 'Toggle Log'
                       @button outlet:'panelbtn', click:'togglePanel', class:'btn', 'Hide'
-              @div outlet:'panel', class: 'panel-body padded', =>
+              @div outlet:'panel', class: 'panel-body padded', tabindex: -1, =>
                   @ul outlet:'errors', class: 'list-group'
 
     # called after the view is constructed
@@ -136,7 +136,7 @@ module.exports = class ResultsView extends View
         if @container.hasClass 'closed'
             @container.parent().height 'auto'
         else
-            @container.parent().height '110px'
+            @container.parent().height '130px'
 
     # toggles the visibility of the tasklist
     toggleTaskList: ->
