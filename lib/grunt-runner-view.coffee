@@ -10,6 +10,7 @@ Also launches an Atom BufferedProcess to run grunt when needed.
 {BufferedProcess, Task} = require 'atom'
 {View, $} = require 'atom-space-pen-views'
 ListView = require './task-list-view'
+path = require 'path'
 
 module.exports = class ResultsView extends View
 
