@@ -21,6 +21,7 @@ module.exports =
         atom.commands.add 'atom-workspace', 'grunt-runner:toggle-log', @view.toggleLog.bind @view
         atom.commands.add 'atom-workspace', 'grunt-runner:toggle-panel', @view.togglePanel.bind @view
         atom.commands.add 'atom-workspace', 'grunt-runner:run', @view.toggleTaskList.bind @view
+        atom.commands.add 'atom-workspace', 'grunt-runner:run-latest', @view.runLatestTask.bind @view
 
 
     # returns a JSON object representing the packages state

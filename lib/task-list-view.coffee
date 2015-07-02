@@ -23,6 +23,7 @@ module.exports = class TaskListView extends SelectListView
 
     # called when an Item is selected
     confirmed:(item) ->
+        @latestItem = item
         @runner.startProcess item
         @cancel()
 
@@ -54,6 +55,13 @@ module.exports = class TaskListView extends SelectListView
                 @div class: 'primary-line', =>
                     @div =>
                         @span task
+
+    # run the latest task
+    runLatest:(runner) ->
+        if @latestItem
+            runner.startProcess @latestItem
+        else
+            @toggle runner
 
     # my empty message
     getEmptyMessage: ->
