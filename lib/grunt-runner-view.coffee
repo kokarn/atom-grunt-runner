@@ -143,6 +143,10 @@ module.exports = class ResultsView extends View
     toggleTaskList: ->
         @taskList.toggle(@)
 
+    # runs the most recent task
+    runLatestTask: ->
+        @taskList.runLatest(@)
+
     # adds an entry to the log
     # converts all newlines to <br>
     addLine:(text, type = "plain") ->
