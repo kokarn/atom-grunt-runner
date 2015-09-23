@@ -81,17 +81,21 @@ module.exports = class ResultsView extends View
             Task.once require.resolve('./parse-config-task'), @path+'/Gruntfile', ({error, tasks})->
 
                 if error
-                    # failed to load Gruntfile.js, try gruntfile.js
-                    Task.once require.resolve('./parse-config-task'), @path+'/gruntfile', ({error, tasks})->
-                        
-                        # log error or add panel to workspace
-                        if error
-                            view.addLine "Error loading gruntfile: #{error}", "error"
-                            view.toggleLog()
-                        else
-                            view.addLine "Grunt file parsed, found #{tasks.length} tasks"
-                            view.tasks = tasks
-                            view.togglePanel()
+                    if error == "Gruntfile not found."
+                      # failed to load Gruntfile.js, try gruntfile.js
+                      Task.once require.resolve('./parse-config-task'), @path+'/gruntfile', ({error, tasks})->
+
+                          # log error or add panel to workspace
+                          if error
+                              view.addLine "Error loading gruntfile: #{error}", "error"
+                              view.toggleLog()
+                          else
+                              view.addLine "Grunt file parsed, found #{tasks.length} tasks"
+                              view.tasks = tasks
+                              view.togglePanel()
+                    else
+                      view.addLine "Error loading gruntfile: #{error}", "error"
+                      view.toggleLog()
                 else
                     view.addLine "Grunt file parsed, found #{tasks.length} tasks"
                     view.tasks = tasks
