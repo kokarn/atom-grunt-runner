@@ -78,7 +78,8 @@ module.exports = class ResultsView extends View
         if !@path
             @addLine "No project opened."
         else
-          @testPaths = [@path+'/Gruntfile', @path+'/gruntfile']
+          path = @path
+          @testPaths = atom.config.get('grunt-runner.gruntfilePaths').map (e) -> "#{path}#{e}"
           Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0)
 
     handleTask: (view, error, tasks, path, index) ->

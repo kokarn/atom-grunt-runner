@@ -12,6 +12,9 @@ module.exports =
         gruntPaths:
             type: 'array'
             default: []
+        gruntfilePaths:
+          type: 'array'
+          default: ['/Gruntfile', '/gruntfile']
 
     # creates grunt-runner view and starts listening for commands
     activate:(state = {}) ->
