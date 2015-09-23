@@ -15,7 +15,7 @@ module.exports = (gruntfilePath) ->
         fn = require(gruntfilePath);
     catch e
 
-    if !fn then return {error: "Gruntfile not found."}
+    if !fn then return {error: "Gruntfile not found.", path: gruntfilePath}
 
     # change dir relative to gruntfile so Grunt will load
     # npm packages and other files from correct path
@@ -25,6 +25,6 @@ module.exports = (gruntfilePath) ->
         fn(grunt)
     catch e
         error = e.code
-        return {error: "Error parsing Gruntfile. " + e.message}
+        return {error: "Error parsing Gruntfile. " + e.message, path: gruntfilePath}
 
     return {tasks: Object.keys grunt.task._tasks}
