@@ -78,28 +78,21 @@ module.exports = class ResultsView extends View
         if !@path
             @addLine "No project opened."
         else
-            Task.once require.resolve('./parse-config-task'), @path+'/Gruntfile', ({error, tasks})->
+          @testPaths = [@path+'/Gruntfile', @path+'/gruntfile']
+          Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0)
 
-                if error
-                    if error == "Gruntfile not found."
-                      # failed to load Gruntfile.js, try gruntfile.js
-                      Task.once require.resolve('./parse-config-task'), @path+'/gruntfile', ({error, tasks})->
+    handleTask: (view, error, tasks, path, index) ->
+      if error
+          view.addLine "Error loading gruntfile: #{error} (#{path})", "error"
+          view.toggleLog()
+          if @testPaths[(index + 1)] && error == "Gruntfile not found."
+            Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
+      else
+          view.addLine "Grunt file parsed, found #{tasks.length} tasks"
+          view.tasks = tasks
+          view.togglePanel()
 
-                          # log error or add panel to workspace
-                          if error
-                              view.addLine "Error loading gruntfile: #{error}", "error"
-                              view.toggleLog()
-                          else
-                              view.addLine "Grunt file parsed, found #{tasks.length} tasks"
-                              view.tasks = tasks
-                              view.togglePanel()
-                    else
-                      view.addLine "Error loading gruntfile: #{error}", "error"
-                      view.toggleLog()
-                else
-                    view.addLine "Grunt file parsed, found #{tasks.length} tasks"
-                    view.tasks = tasks
-                    view.togglePanel()
+
 
     startStopAction: ->
         return @toggleTaskList() if @process == null
