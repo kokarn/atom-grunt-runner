@@ -52,6 +52,7 @@ module.exports = class ResultsView extends View
         atom.tooltips.add @logbtn,
             title: ""
             keyBindingCommand: 'grunt-runner:toggle-log'
+
         atom.tooltips.add @panelbtn,
             title: ""
             keyBindingCommand: 'grunt-runner:toggle-panel'
@@ -91,9 +92,7 @@ module.exports = class ResultsView extends View
       else
           view.addLine "Grunt file parsed, found #{tasks.length} tasks"
           view.tasks = tasks
-          view.togglePanel()
-
-
+          view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden')
 
     startStopAction: ->
         return @toggleTaskList() if @process == null
