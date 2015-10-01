@@ -38,12 +38,12 @@
         }
 
         &[data-status=ready]:before {
-            color: green;
+            color: @text-color-success;
             content: "\f03a";
         }
 
         &[data-status=error]:before {
-            color: red;
+            color: @text-color-error;
             content: "\f02d";
         }
 
@@ -68,30 +68,28 @@
         li {
             padding: 3px 0px;
             margin: 0px;
-            font-size: 9pt;
-            line-height: 12pt;
             white-space: normal;
             border-bottom: solid 1px rgba( 0, 0, 0, .5 );
             font-family: monospace;
 
             .yellow {
-                color: yellow;
+                color: @text-color-warning;
             }
 
             .red {
-                color: #E20000;
+                color: @text-color-error;
             }
 
             .green {
-                color: green;
+                color: @text-color-success;
             }
 
             .cyan {
-                color: cyan;
+                color: @text-color-info;
             }
 
             .gray {
-                color: gray;
+                color: @text-color;
             }
 
             .strong {
