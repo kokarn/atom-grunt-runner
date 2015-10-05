@@ -126,9 +126,9 @@ module.exports = class ResultsView extends View
     # stops the current process if it is running
     stopProcess:(noMessage) ->
         @addLine 'Grunt task was ended', 'warning' if @process and not @process?.killed and not noMessage
+        @status.attr 'data-status', null if @process and not @process?.killed and not noMessage
         @process?.kill()
         @process = null
-        @status.attr 'data-status', null
         @.setStartStopBtn false
 
     # toggles the visibility of the entire panel
