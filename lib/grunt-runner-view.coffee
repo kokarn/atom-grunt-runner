@@ -19,6 +19,7 @@ module.exports = class ResultsView extends View
     taskList: null,
     tasks: [],
     cwd: null,
+    failuresLog: [],
 
     originalPaths: process.env.NODE_PATH.split(':'),
 
@@ -86,10 +87,18 @@ module.exports = class ResultsView extends View
 
     handleTask: (view, error, tasks, path, index) ->
       if error
-          view.addLine "Error loading gruntfile: #{error} (#{path})", "error"
-          view.toggleLog()
+          # does not display the log directly, waits until all attempts have failed
+          @failuresLog.push({line: "Error loading gruntfile: #{error} (#{path})", "error"})
+
           if @testPaths[(index + 1)] && error == "Gruntfile not found."
             Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
+
+          # all gruntfile possibilities have failed, show all logs
+          if !@testPaths[(index + 1)]
+              for i in [0...(index + 1)]
+                  view.addLine @failuresLog[i]
+
+              view.toggleLog()
       else
           view.addLine "Grunt file parsed, found #{tasks.length} tasks"
           view.tasks = tasks
