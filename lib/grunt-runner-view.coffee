@@ -88,7 +88,7 @@ module.exports = class ResultsView extends View
     handleTask: (view, error, tasks, path, index) ->
       if error
           # does not display the log directly, waits until all attempts have failed
-          @failuresLog.push({line: "Error loading gruntfile: #{error} (#{path})", "error"})
+          @failuresLog.push("Error loading gruntfile: #{error} (#{path})")
 
           if @testPaths[(index + 1)] && error == "Gruntfile not found."
             Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
@@ -96,7 +96,7 @@ module.exports = class ResultsView extends View
           # all gruntfile possibilities have failed, show all logs
           if !@testPaths[(index + 1)]
               for i in [0...(index + 1)]
-                  view.addLine @failuresLog[i]
+                  view.addLine(@failuresLog[i], "error")
 
               view.toggleLog()
       else
