@@ -18,6 +18,7 @@ module.exports = class ResultsView extends View
     process: null,
     taskList: null,
     tasks: [],
+    cwd: null,
 
     originalPaths: process.env.NODE_PATH.split(':'),
 
@@ -92,6 +93,7 @@ module.exports = class ResultsView extends View
       else
           view.addLine "Grunt file parsed, found #{tasks.length} tasks"
           view.tasks = tasks
+          @cwd = @testPaths[index].replace(/\\/g, '/').split('/').slice(0, -1).join('/')
           view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden')
 
     startStopAction: ->
@@ -210,12 +212,12 @@ module.exports = class ResultsView extends View
             @process = new BufferedProcess
                 command: 'grunt'
                 args: [task]
-                options: {cwd: path}
+                options: {cwd: @cwd}
                 stdout: stdout.bind @
                 exit: exit.bind @
         catch e
             # this never gets caught...
-            @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"
+            @addLine "Could not find grunt command. Make sure to set the path in the configuration settings." + JSON.stringify(e), "error"
             @stopProcess()
 
     resizeStarted: =>
