@@ -18,6 +18,8 @@ module.exports = class ResultsView extends View
     process: null,
     taskList: null,
     tasks: [],
+    cwd: null,
+    failuresLog: [],
 
     originalPaths: process.env.NODE_PATH.split(':'),
 
@@ -85,13 +87,22 @@ module.exports = class ResultsView extends View
 
     handleTask: (view, error, tasks, path, index) ->
       if error
-          view.addLine "Error loading gruntfile: #{error} (#{path})", "error"
-          view.toggleLog()
+          # does not display the log directly, waits until all attempts have failed
+          @failuresLog.push("Error loading gruntfile: #{error} (#{path})")
+
           if @testPaths[(index + 1)] && error == "Gruntfile not found."
             Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
+
+          # all gruntfile possibilities have failed, show all logs
+          if !@testPaths[(index + 1)]
+              for i in [0...(index + 1)]
+                  view.addLine(@failuresLog[i], "error")
+
+              view.toggleLog()
       else
           view.addLine "Grunt file parsed, found #{tasks.length} tasks"
           view.tasks = tasks
+          @cwd = @testPaths[index].replace(/\\/g, '/').split('/').slice(0, -1).join('/')
           view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden')
 
     startStopAction: ->
@@ -210,12 +221,12 @@ module.exports = class ResultsView extends View
             @process = new BufferedProcess
                 command: 'grunt'
                 args: [task]
-                options: {cwd: path}
+                options: {cwd: @cwd}
                 stdout: stdout.bind @
                 exit: exit.bind @
         catch e
             # this never gets caught...
-            @addLine "Could not find grunt command. Make sure to set the path in the configuration settings.", "error"
+            @addLine "Could not find grunt command. Make sure to set the path in the configuration settings." + JSON.stringify(e), "error"
             @stopProcess()
 
     resizeStarted: =>

@@ -12,14 +12,14 @@ module.exports = (gruntfilePath) ->
     fn = null;
 
     try
+        # change dir relative to gruntfile so Grunt will load
+        # npm packages and other files from correct path
+        process.chdir path.dirname gruntfilePath
+
         fn = require(gruntfilePath);
     catch e
 
     if !fn then return {error: "Gruntfile not found.", path: gruntfilePath}
-
-    # change dir relative to gruntfile so Grunt will load
-    # npm packages and other files from correct path
-    process.chdir path.dirname gruntfilePath
 
     try
         fn(grunt)
