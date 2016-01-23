@@ -114,12 +114,16 @@ module.exports = class ResultsView extends View
           Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0, starting)
 
     handleTask: (view, error, tasks, path, index, starting) ->
+
+      if index is 0
+        @failuresLog = []
+
       if error
           # does not display the log directly, waits until all attempts have failed
           @failuresLog.push("Error loading gruntfile: #{error} (#{path})")
 
           if @testPaths[(index + 1)] && error == "Gruntfile not found."
-            Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
+            Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1), starting)
 
           # all gruntfile possibilities have failed, show all logs
           if !@testPaths[(index + 1)]
@@ -129,7 +133,7 @@ module.exports = class ResultsView extends View
               if starting
                 view.toggleLog()
       else
-          view.addLine "Grunt file parsed, found #{tasks.length} tasks"
+          view.addLine "Grunt file parsed, found #{tasks.length} tasks in #{@testPaths[index]}"
           view.tasks = tasks
           @cwd = @testPaths[index].replace(/\\/g, '/').split('/').slice(0, -1).join('/')
           view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden') or !starting
