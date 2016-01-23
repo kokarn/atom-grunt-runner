@@ -87,9 +87,8 @@ module.exports = class ResultsView extends View
 
         for @projectPath in @paths
           # make sure we don't get punched in the face by a similarly named project, add a slash
-          @projectPath = "#{@projectPath}/"
-          @comparison = @currentFilePath.indexOf @projectPath
-          if @comparison == 0
+          @comparison = @currentFilePath.indexOf "#{@projectPath}/"
+          if @comparison is 0
             @path = @projectPath
             break
 
