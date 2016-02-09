@@ -19,5 +19,5 @@ Build your project using Grunt from Atom.
  1. By default this package will try to use the the grunt module in your `[projectDir]/node_modules`
  directory. If for some reason that doesn't work, you can choose a path to look for the grunt module
  in by going to the settings. (e.g. `/usr/bin` or `~/path-to-global/node_modules`)
- 2. For OS X Yosemite (and higher?) PATH error see this article https://github.com/nickclaw/atom-grunt-runner/wiki/Config#user-content-troubleshooting-for-yosemite-os-x-1010
+ 2. For OS X Yosemite (and higher?) PATH error see this article https://github.com/kokarn/atom-grunt-runner/wiki/Config#user-content-troubleshooting-for-yosemite-os-x-1010
  3. If your project has more than one Gruntfile.js or Gruntfile.js is not located in a project root folder then you can use the *Gruntfile Paths* setting. The order matters: first valid Gruntfile found will be used.
