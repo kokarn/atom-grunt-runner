@@ -12,12 +12,16 @@
     "run"
   ],
   "version": "0.11.0",
-  "repository": "https://github.com/nickclaw/atom-grunt-runner",
+  "repository": "https://github.com/kokarn/atom-grunt-runner",
   "license": "MIT",
   "author": {
+    "name": "Oskar Risberg",
+    "email": "kokarn@gmail.com"
+  },
+  "contributors": [{
     "name": "Nicholas Clawson",
     "url": "http://nickclaw.com"
-  },
+  }],
   "main": "./lib/grunt-runner.coffee",
   "engines": {
     "atom": ">0.50.0"
