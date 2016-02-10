@@ -43,7 +43,6 @@ module.exports = class ResultsView extends View
         view = @
 
         atom.project.onDidChangePaths -> view.parseGruntFile()
-        atom.workspace.onDidChangeActivePaneItem -> view.parseGruntFile()
 
         @taskList = new ListView state.taskList
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
@@ -65,36 +64,9 @@ module.exports = class ResultsView extends View
     parseGruntFile:(starting) ->
         @paths = atom.project.getPaths()
 
-        @currentProjectPath = @path
-
-        # use the first path by default
+        # Assume the "real" paths is the first path.
+        # TODO: Real fix
         @path = @paths[0]
-
-        # search @paths for the active project
-        # use the most accurate match first by ordering by path length descending
-        @paths.sort (a, b) ->
-          return b.length - a.length
-
-        @editor = atom.workspace.getActivePaneItem()
-        if !@editor?.buffer
-          # not a file, maybe a settings panel
-          return
-        @file = @editor?.buffer.file
-        @currentFilePath = @file?.path
-        if !@currentFilePath
-          # not a file, maybe a new / default document
-          return
-
-        for @projectPath in @paths
-          # make sure we don't get punched in the face by a similarly named project, add a slash
-          @comparison = @currentFilePath.indexOf "#{@projectPath}/"
-          if @comparison is 0
-            @path = @projectPath
-            break
-
-        if @path == @currentProjectPath
-          # project hasn't changed, nothing to do
-          return
 
         gruntPaths = atom.config.get('grunt-runner.gruntPaths')
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
@@ -111,32 +83,27 @@ module.exports = class ResultsView extends View
         else
           path = @path
           @testPaths = atom.config.get('grunt-runner.gruntfilePaths').map (e) -> "#{path}#{e}"
-          Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0, starting)
+          Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0)
 
-    handleTask: (view, error, tasks, path, index, starting) ->
-
-      if index is 0
-        @failuresLog = []
-
+    handleTask: (view, error, tasks, path, index) ->
       if error
           # does not display the log directly, waits until all attempts have failed
           @failuresLog.push("Error loading gruntfile: #{error} (#{path})")
 
           if @testPaths[(index + 1)] && error == "Gruntfile not found."
-            Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1), starting)
+            Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1))
 
           # all gruntfile possibilities have failed, show all logs
           if !@testPaths[(index + 1)]
               for i in [0...(index + 1)]
                   view.addLine(@failuresLog[i], "error")
 
-              if starting
-                view.toggleLog()
+              view.toggleLog()
       else
           view.addLine "Grunt file parsed, found #{tasks.length} tasks in #{@testPaths[index]}"
           view.tasks = tasks
           @cwd = @testPaths[index].replace(/\\/g, '/').split('/').slice(0, -1).join('/')
-          view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden') or !starting
+          view.togglePanel() unless atom.config.get('grunt-runner.panelStartsHidden')
 
     startStopAction: ->
         return @toggleTaskList() if @process == null
