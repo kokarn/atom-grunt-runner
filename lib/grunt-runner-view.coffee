@@ -41,7 +41,7 @@ module.exports = class GruntRunnerView extends View
         @taskList = new ListView
         @disposables = new CompositeDisposable
         @disposables.add(
-            atom.project.onDidChangePaths -> @parseGruntFile()
+            atom.project.onDidChangePaths => @parseGruntFile()
 
             atom.tooltips.add @startstopbtn,
                 title: "Start",
