@@ -7,22 +7,20 @@ discover the projects grunt commands. Logs errors and output.
 Also launches an Atom BufferedProcess to run grunt when needed.
 ###
 
-{BufferedProcess, Task} = require 'atom'
+{BufferedProcess, Task, CompositeDisposable} = require 'atom'
 {View, $} = require 'atom-space-pen-views'
 ListView = require './task-list-view'
 path = require 'path'
 
-module.exports = class ResultsView extends View
-
+module.exports = class GruntRunnerView extends View
     path: null,
     process: null,
     taskList: null,
     tasks: [],
     cwd: null,
     failuresLog: [],
-
     originalPaths: process.env.NODE_PATH.split(':'),
-
+    gruntRunnerPannel: null,
 
     # html layout
     @content: ->
@@ -39,26 +37,40 @@ module.exports = class ResultsView extends View
 
     # called after the view is constructed
     # initialize list and triggers processing of the gruntfile
-    initialize:(state = {}) ->
-        view = @
+    initialize: (state) ->
+        @taskList = new ListView
+        @disposables = new CompositeDisposable
+        @disposables.add(
+            atom.project.onDidChangePaths -> @parseGruntFile()
 
-        atom.project.onDidChangePaths -> view.parseGruntFile()
+            atom.tooltips.add @startstopbtn,
+                title: "Start",
+                keyBindingCommand: 'grunt-runner:run'
 
-        @taskList = new ListView state.taskList
-        @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
+            atom.tooltips.add @logbtn,
+                title: "",
+                keyBindingCommand: 'grunt-runner:toggle-log'
 
-        atom.tooltips.add @startstopbtn,
-            title: "Start"
-            keyBindingCommand: 'grunt-runner:run'
+            atom.tooltips.add @panelbtn,
+                title: "",
+                keyBindingCommand: 'grunt-runner:toggle-panel'
+        )
+        @handleEvents()
+        @attach() if state.attached
 
-        atom.tooltips.add @logbtn,
-            title: ""
-            keyBindingCommand: 'grunt-runner:toggle-log'
+    deactivate: ->
+        @disposables.dispose()
+        @detach() if @gruntRunnerPannel?
 
-        atom.tooltips.add @panelbtn,
-            title: ""
-            keyBindingCommand: 'grunt-runner:toggle-panel'
+    serialize: ->
+        attached: @gruntRunnerPannel?
 
+    attach: ->
+        @gruntRunnerPannel = atom.workspace.addBottomPanel(item: this)
+
+    detach: ->
+        @gruntRunnerPannel.destroy()
+        @gruntRunnerPannel = null
 
     # launches a task to parse the projects gruntfile if it exists
     parseGruntFile:(starting) ->
@@ -72,7 +84,6 @@ module.exports = class ResultsView extends View
         gruntPaths = if Array.isArray gruntPaths then gruntPaths else []
         paths = @originalPaths.concat(gruntPaths, [@path + '/node_modules'])
         process.env.NODE_PATH = paths.join(path.delimiter)
-        view = @
 
         # clear panel output and tasklist items
         @emptyPanel()
@@ -81,9 +92,12 @@ module.exports = class ResultsView extends View
         if !@path
             @addLine "No project opened."
         else
-          path = @path
-          @testPaths = atom.config.get('grunt-runner.gruntfilePaths').map (e) -> "#{path}#{e}"
-          Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(view, error, tasks, path, 0)
+            path = @path
+            @testPaths = atom.config.get('grunt-runner.gruntfilePaths').map (e) -> "#{path}#{e}"
+            Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(@, error, tasks, path, 0)
+
+    handleEvents: ->
+        @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
 
     handleTask: (view, error, tasks, path, index) ->
       if error
@@ -113,12 +127,12 @@ module.exports = class ResultsView extends View
         if isRunning
             @.startstopbtn.text 'Stop'
             atom.tooltips.add @.startstopbtn,
-                title: ""
+                title: "",
                 keyBindingCommand: 'grunt-runner:stop'
         else
             @.startstopbtn.text 'Start'
             atom.tooltips.add @.startstopbtn,
-                title: ""
+                title: "",
                 keyBindingCommand: 'grunt-runner:run'
 
     # called to start the process
@@ -144,8 +158,12 @@ module.exports = class ResultsView extends View
 
     # toggles the visibility of the entire panel
     togglePanel: ->
-        return atom.workspace.addBottomPanel(item: this) unless @.isOnDom()
-        return @detach() if @.isOnDom()
+        if @isVisible()
+            @detach()
+        else
+            @attach()
+      # return atom.workspace.addBottomPanel(item: this) unless @.isOnDom()
+      # return @detach() if @.isOnDom()
 
     # toggles the visibility of the log
     toggleLog: ->
@@ -178,10 +196,6 @@ module.exports = class ResultsView extends View
     # clears the log
     emptyPanel: ->
         @errors.empty()
-
-    # returns a JSON object representing the state of the view
-    serialize: ->
-        return taskList: @taskList.serialize()
 
     # bash colors to html
     colorize:(text) ->

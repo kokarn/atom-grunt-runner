@@ -46,8 +46,6 @@ module.exports = class TaskListView extends SelectListView
 
         @focusFilterEditor()
 
-    serialize: ->
-
     # uses jquery(?) to return an object
     viewForItem:(task) ->
         $$ ->
