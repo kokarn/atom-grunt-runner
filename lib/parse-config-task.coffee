@@ -27,4 +27,12 @@ module.exports = (gruntfilePath) ->
         error = e.code
         return {error: "Error parsing Gruntfile. " + e.message, path: gruntfilePath}
 
-    return {tasks: Object.keys grunt.task._tasks}
+    # get all tasks and subtasks
+    tasks = []
+    for own task of grunt.task._tasks
+        raws = Object.keys grunt.config.get(task) or {}
+        subs = (sub for sub in raws when sub not in ["files", "options", "globals"])
+        tasks.push String task
+        tasks.push "#{task}:#{sub}" for sub in subs if subs.length > 1
+
+    return {tasks: tasks}
