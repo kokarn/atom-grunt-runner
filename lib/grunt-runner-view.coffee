@@ -39,6 +39,16 @@ module.exports = class GruntRunnerView extends View
     # initialize list and triggers processing of the gruntfile
     initialize: (state) ->
         @taskList = new ListView
+        @handleEvents()
+        @attach() if state.attached
+
+    deactivate: ->
+        @detach() if @gruntRunnerPannel?
+
+    serialize: ->
+        attached: @gruntRunnerPannel?
+
+    attach: ->
         @disposables = new CompositeDisposable
         @disposables.add(
             atom.project.onDidChangePaths => @parseGruntFile()
@@ -55,20 +65,11 @@ module.exports = class GruntRunnerView extends View
                 title: "",
                 keyBindingCommand: 'grunt-runner:toggle-panel'
         )
-        @handleEvents()
-        @attach() if state.attached
-
-    deactivate: ->
-        @disposables.dispose()
-        @detach() if @gruntRunnerPannel?
-
-    serialize: ->
-        attached: @gruntRunnerPannel?
-
-    attach: ->
         @gruntRunnerPannel = atom.workspace.addBottomPanel(item: this)
 
     detach: ->
+        @disposables.dispose()
+        @disposables = null
         @gruntRunnerPannel.destroy()
         @gruntRunnerPannel = null
 
